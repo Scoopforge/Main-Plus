@@ -104,6 +104,7 @@ scoop config aria2-min-split-size 4M
 
 |                            App                            | Auto-Update ? | Original ? |
 | :-------------------------------------------------------: | :-----------: | :--------: |
+|   [cargo-dist](https://github.com/axodotdev/cargo-dist)   |       ✓       |     ✓      |
 | [LTeX-ls-Plus](https://github.com/ltex-plus/ltex-ls-plus) |       ✓       |     ✓      |
 |     [MicroMamba](https://github.com/mamba-org/mamba)      |       ✓       |     ✓      |
 |   [N-m3u8DL-RE](https://github.com/nilaoda/N_m3u8DL-RE)   |       ✓       |     ✓      |
