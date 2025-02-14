@@ -9,7 +9,7 @@
             "hash": "8d92e7a9542692bbaae85bdb52eee6234627067eb0700841dcb36d89896fd9ca"
         }
     },
-    "bin": "cargo-dist.exe",
+    "bin": "dist.exe",
     "checkver": {
         "github": "https://github.com/axodotdev/cargo-dist"
     },
