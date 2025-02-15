@@ -96,6 +96,7 @@ scoop config aria2-min-split-size 4M
 |   [cargo-dist](https://github.com/axodotdev/cargo-dist)   |       ✓       |     ✓      |
 | [ltex-ls-plus](https://github.com/ltex-plus/ltex-ls-plus) |       ✓       |     ✓      |
 |     [micromamba](https://github.com/mamba-org/mamba)      |       ✓       |     ✓      |
+| [neocmakelsp](https://github.com/neocmakelsp/neocmakelsp) |       ✓       |     ✓      |
 |   [n-m3u8dl-re](https://github.com/nilaoda/N_m3u8DL-RE)   |       ✓       |     ✓      |
 |        [pixi](https://github.com/prefix-dev/pixi)         |       ✓       |     ✓      |
 |      [sendme](https://github.com/n0-computer/sendme)      |       ✓       |     ✓      |
