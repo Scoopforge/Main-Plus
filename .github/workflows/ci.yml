@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     branches:
-      - "master"
+      - "main"
   workflow_dispatch:
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
           ref: develop
           path: "scoop_core"
       - name: Init Test Suite
-        uses: potatoqualitee/psmodulecache@v6
+        uses: potatoqualitee/psmodulecache@v6.2
         with:
           modules-to-cache: PSScriptAnalyzer, BuildHelpers, Pester:4.10.1
           shell: powershell
