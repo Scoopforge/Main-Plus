@@ -89,8 +89,6 @@ scoop config aria2-min-split-size 4M
 
 ## ⭐️ Summary
 
-### CLI
-
 |                            App                            | Auto-Update ? | Original ? |
 | :-------------------------------------------------------: | :-----------: | :--------: |
 |   [cargo-dist](https://github.com/axodotdev/cargo-dist)   |       ✓       |     ✓      |
