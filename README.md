@@ -100,4 +100,5 @@ scoop config aria2-min-split-size 4M
 |        [pixi](https://github.com/prefix-dev/pixi)         |       ✓       |     ✓      |
 |      [sendme](https://github.com/n0-computer/sendme)      |       ✓       |     ✓      |
 |      [serpl](https://github.com/yassinebridi/serpl)       |       ✓       |     ✓      |
+|     [tex-fmt](https://github.com/WGUNDERWOOD/tex-fmt)     |       ✓       |     ✓      |
 |  [wthrr](https://github.com/ttytm/wthrr-the-weathercrab)  |       ✓       |     ✓      |
