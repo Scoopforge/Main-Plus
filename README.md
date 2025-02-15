@@ -69,26 +69,15 @@ scoop bucket add main-plus https://github.com/ivaquero/scoop-main-plus
 scoop update
 ```
 
-### 🚀 Step 4: Install Apps
-
-#### Check the exact name of App by `scoop search`
+### 🚀 Step 4: Install CLI
 
 ```powershell
-scoop search <app_name>
-```
-
-#### Install Apps with assistance of plugin `scoop-completion`
-
-```powershell
-scoop install scoop-completion
 scoop install <app_name>
 ```
 
-> to use `scoop-completion`, just to hit `tab` after initial letters of App names
-
 ## 📝 Trivial
 
-### Tweak with Parameters in Aria2
+### Tweaking Parameters of Aria2
 
 ```powershell
 scoop config aria2-enabled true
@@ -105,19 +94,10 @@ scoop config aria2-min-split-size 4M
 |                            App                            | Auto-Update ? | Original ? |
 | :-------------------------------------------------------: | :-----------: | :--------: |
 |   [cargo-dist](https://github.com/axodotdev/cargo-dist)   |       ✓       |     ✓      |
-| [LTeX-ls-Plus](https://github.com/ltex-plus/ltex-ls-plus) |       ✓       |     ✓      |
-|     [MicroMamba](https://github.com/mamba-org/mamba)      |       ✓       |     ✓      |
-|   [N-m3u8DL-RE](https://github.com/nilaoda/N_m3u8DL-RE)   |       ✓       |     ✓      |
+| [ltex-ls-plus](https://github.com/ltex-plus/ltex-ls-plus) |       ✓       |     ✓      |
+|     [micromamba](https://github.com/mamba-org/mamba)      |       ✓       |     ✓      |
+|   [n-m3u8dl-re](https://github.com/nilaoda/N_m3u8DL-RE)   |       ✓       |     ✓      |
 |        [pixi](https://github.com/prefix-dev/pixi)         |       ✓       |     ✓      |
 |      [sendme](https://github.com/n0-computer/sendme)      |       ✓       |     ✓      |
 |      [serpl](https://github.com/yassinebridi/serpl)       |       ✓       |     ✓      |
 |  [wthrr](https://github.com/ttytm/wthrr-the-weathercrab)  |       ✓       |     ✓      |
-
-## Notes
-
-Due to the complexity of Win to permission management, for some common applications that do not provide portable installation packages and require administrator application permissions, it is recommended to use WinGet for installation
-
-```powershell
-scoop install winget
-winget install Rakuten.Viber
-```
