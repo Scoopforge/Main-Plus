@@ -1,7 +1,7 @@
 # 🍨 Scoop Main Plus 🍨
 
-[![Excavator](https://github.com/ivaquero/scoop-main-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/ivaquero/scoop-main-plus/actions/workflows/ci.yml)
-[![license](https://img.shields.io/github/license/ivaquero/scoop-main-plus)](https://github.com/ivaquero/scoop-main-plus/blob/master/LICENSE)
+[![Excavator](https://github.com/Scoopforge/Main-Plus/actions/workflows/ci.yml/badge.svg)](https://github.com/Scoopforge/Main-Plus/actions/workflows/ci.yml)
+[![license](https://img.shields.io/github/license/ivaquero/scoop-main-plus)](https://github.com/Scoopforge/Main-Plus/blob/master/LICENSE)
 [![code size](https://img.shields.io/github/languages/code-size/ivaquero/scoop-main-plus.svg)](https://img.shields.io/github/languages/code-size/ivaquero/scoop-main-plus.svg)
 [![repo size](https://img.shields.io/github/repo-size/ivaquero/scoop-main-plus.svg)](https://img.shields.io/github/repo-size/ivaquero/scoop-main-plus.svg)
 
@@ -12,7 +12,7 @@ A Bucket for the Best Windows Package Manager [Scoop](https://github.com/ScoopIn
 For ones familiar with Scoop:
 
 ```powershell
-scoop bucket add main-plus https://github.com/ivaquero/scoop-main-plus
+scoop bucket add main-plus https://github.com/Scoopforge/Main-Plus
 ```
 
 Enjoy the fun of command line!
@@ -65,7 +65,7 @@ scoop config aria2-enabled false
 ### ✈️ Step 3: Add this wonderful bucket and update, mua~ 💋
 
 ```powershell
-scoop bucket add main-plus https://github.com/ivaquero/scoop-main-plus
+scoop bucket add main-plus https://github.com/Scoopforge/Main-Plus
 scoop update
 ```
 
