@@ -92,6 +92,7 @@ scoop config aria2-min-split-size 4M
 |                            App                            | Auto-Update ? | Original ? |
 | :-------------------------------------------------------: | :-----------: | :--------: |
 |   [cargo-dist](https://github.com/axodotdev/cargo-dist)   |       ✓       |     ✓      |
+|      [chatgpt-cli](https://github.com/j178/chatgpt)       |       ✓       |     ✓      |
 |        [gauth](https://github.com/pcarrier/gauth)         |       ✓       |     ✓      |
 | [ltex-ls-plus](https://github.com/ltex-plus/ltex-ls-plus) |       ✓       |     ✓      |
 |     [micromamba](https://github.com/mamba-org/mamba)      |       ✓       |     ✓      |
