@@ -99,6 +99,7 @@ scoop config aria2-min-split-size 4M
 | [neocmakelsp](https://github.com/neocmakelsp/neocmakelsp) |       ✓       |     ✓      |
 |   [n-m3u8dl-re](https://github.com/nilaoda/N_m3u8DL-RE)   |       ✓       |     ✓      |
 |        [pixi](https://github.com/prefix-dev/pixi)         |       ✓       |     ✓      |
+|  [pscompletions](https://github.com/abgox/PSCompletions)  |       ✓       |     ✓      |
 |      [sendme](https://github.com/n0-computer/sendme)      |       ✓       |     ✓      |
 |      [serpl](https://github.com/yassinebridi/serpl)       |       ✓       |     ✓      |
 |     [tex-fmt](https://github.com/WGUNDERWOOD/tex-fmt)     |       ✓       |     ✓      |
