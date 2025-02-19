@@ -101,4 +101,5 @@ scoop config aria2-min-split-size 4M
 |      [sendme](https://github.com/n0-computer/sendme)      |       ✓       |     ✓      |
 |      [serpl](https://github.com/yassinebridi/serpl)       |       ✓       |     ✓      |
 |     [tex-fmt](https://github.com/WGUNDERWOOD/tex-fmt)     |       ✓       |     ✓      |
+|   [typstyle](https://github.com/Enter-tainer/typstyle)    |       ✓       |     ✓      |
 |  [wthrr](https://github.com/ttytm/wthrr-the-weathercrab)  |       ✓       |     ✓      |
