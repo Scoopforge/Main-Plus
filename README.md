@@ -56,12 +56,6 @@ scoop install aria2
 scoop install git
 ```
 
-if you are using VPN, you need to turn off aria2 before installing Apps
-
-```powershell
-scoop config aria2-enabled false
-```
-
 ### ✈️ Step 3: Add this wonderful bucket and update, mua~ 💋
 
 ```powershell
@@ -72,7 +66,7 @@ scoop update
 ### 🚀 Step 4: Install CLI
 
 ```powershell
-scoop install <app_name>
+scoop install <cli_name>
 ```
 
 ## 📝 Trivial
