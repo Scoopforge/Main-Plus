@@ -87,6 +87,7 @@ scoop config aria2-min-split-size 4M
 | :-------------------------------------------------------: | :-----------: | :--------: |
 |   [cargo-dist](https://github.com/axodotdev/cargo-dist)   |       ✓       |     ✓      |
 |      [chatgpt-cli](https://github.com/j178/chatgpt)       |       ✓       |     ✓      |
+|   [cxx2flow](https://github.com/Enter-tainer/cxx2flow)    |       ✓       |     ✓      |
 |        [gauth](https://github.com/pcarrier/gauth)         |       ✓       |     ✓      |
 | [ltex-ls-plus](https://github.com/ltex-plus/ltex-ls-plus) |       ✓       |     ✓      |
 |          [mado](https://github.com/akiomik/mado)          |       ✓       |     ✓      |
