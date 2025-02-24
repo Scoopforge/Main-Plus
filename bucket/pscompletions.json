@@ -13,9 +13,7 @@
         "completions",
         "data.json"
     ],
-    "checkver": {
-        "github": "https://github.com/abgox/PSCompletions"
-    },
+    "checkver": "github",
     "autoupdate": {
         "url": "https://psg-prod-eastus.azureedge.net/packages/pscompletions.$version.nupkg"
     },

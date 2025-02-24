@@ -89,6 +89,7 @@ scoop config aria2-min-split-size 4M
 |      [chatgpt-cli](https://github.com/j178/chatgpt)       |       ✓       |     ✓      |
 |        [gauth](https://github.com/pcarrier/gauth)         |       ✓       |     ✓      |
 | [ltex-ls-plus](https://github.com/ltex-plus/ltex-ls-plus) |       ✓       |     ✓      |
+|          [mado](https://github.com/akiomik/mado)          |       ✓       |     ✓      |
 |     [micromamba](https://github.com/mamba-org/mamba)      |       ✓       |     ✓      |
 | [neocmakelsp](https://github.com/neocmakelsp/neocmakelsp) |       ✓       |     ✓      |
 |   [n-m3u8dl-re](https://github.com/nilaoda/N_m3u8DL-RE)   |       ✓       |     ✓      |

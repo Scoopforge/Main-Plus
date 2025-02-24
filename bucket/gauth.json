@@ -10,9 +10,7 @@
         }
     },
     "bin": "gauth.exe",
-    "checkver": {
-        "github": "https://github.com/pcarrier/gauth"
-    },
+    "checkver": "github",
     "autoupdate": {
         "architecture": {
             "64bit": {
