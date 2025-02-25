@@ -83,22 +83,23 @@ scoop config aria2-min-split-size 4M
 
 ## ⭐️ Summary
 
-|                                   App                                   | Auto-Update ? | Original ? |
-| :---------------------------------------------------------------------: | :-----------: | :--------: |
-|          [cargo-dist](https://github.com/axodotdev/cargo-dist)          |       ✓       |     ✓      |
-|             [chatgpt-cli](https://github.com/j178/chatgpt)              |       ✓       |     ✓      |
-|          [cxx2flow](https://github.com/Enter-tainer/cxx2flow)           |       ✓       |     ✓      |
-| [excalidraw-converter](https://github.com/sindrel/excalidraw-converter) |       ✓       |     ✓      |
-|               [gauth](https://github.com/pcarrier/gauth)                |       ✓       |     ✓      |
-|        [ltex-ls-plus](https://github.com/ltex-plus/ltex-ls-plus)        |       ✓       |     ✓      |
-|                 [mado](https://github.com/akiomik/mado)                 |       ✓       |     ✓      |
-|            [micromamba](https://github.com/mamba-org/mamba)             |       ✓       |     ✓      |
-|        [neocmakelsp](https://github.com/neocmakelsp/neocmakelsp)        |       ✓       |     ✓      |
-|          [n-m3u8dl-re](https://github.com/nilaoda/N_m3u8DL-RE)          |       ✓       |     ✓      |
-|               [pixi](https://github.com/prefix-dev/pixi)                |       ✓       |     ✓      |
-|         [pscompletions](https://github.com/abgox/PSCompletions)         |       ✓       |     ✓      |
-|             [sendme](https://github.com/n0-computer/sendme)             |       ✓       |     ✓      |
-|             [serpl](https://github.com/yassinebridi/serpl)              |       ✓       |     ✓      |
-|            [tex-fmt](https://github.com/WGUNDERWOOD/tex-fmt)            |       ✓       |     ✓      |
-|          [typstyle](https://github.com/Enter-tainer/typstyle)           |       ✓       |     ✓      |
-|         [wthrr](https://github.com/ttytm/wthrr-the-weathercrab)         |       ✓       |     ✓      |
+|                                   App                                   | Auto-Update ? |
+| :---------------------------------------------------------------------: | :-----------: |
+|          [cargo-dist](https://github.com/axodotdev/cargo-dist)          |       ✓       |
+|             [chatgpt-cli](https://github.com/j178/chatgpt)              |       ✓       |
+|          [cxx2flow](https://github.com/Enter-tainer/cxx2flow)           |       ✓       |
+| [excalidraw-converter](https://github.com/sindrel/excalidraw-converter) |       ✓       |
+|               [gauth](https://github.com/pcarrier/gauth)                |       ✓       |
+|        [ltex-ls-plus](https://github.com/ltex-plus/ltex-ls-plus)        |       ✓       |
+|                 [mado](https://github.com/akiomik/mado)                 |       ✓       |
+|            [micromamba](https://github.com/mamba-org/mamba)             |       ✓       |
+|        [neocmakelsp](https://github.com/neocmakelsp/neocmakelsp)        |       ✓       |
+|          [n-m3u8dl-re](https://github.com/nilaoda/N_m3u8DL-RE)          |       ✓       |
+|               [pixi](https://github.com/prefix-dev/pixi)                |       ✓       |
+|         [pscompletions](https://github.com/abgox/PSCompletions)         |       ✓       |
+|             [sendme](https://github.com/n0-computer/sendme)             |       ✓       |
+|             [serpl](https://github.com/yassinebridi/serpl)              |       ✓       |
+|           [shiroa](https://github.com/Myriad-Dreamin/shiroa)            |       ✓       |
+|            [tex-fmt](https://github.com/WGUNDERWOOD/tex-fmt)            |       ✓       |
+|          [typstyle](https://github.com/Enter-tainer/typstyle)           |       ✓       |
+|         [wthrr](https://github.com/ttytm/wthrr-the-weathercrab)         |       ✓       |
