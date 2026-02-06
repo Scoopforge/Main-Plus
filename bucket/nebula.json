@@ -13,6 +13,10 @@
             "hash": "fc8d08cd44cadf00e05e2c53000a08a7e21c6343ddbe7dac0ab60a7cc5fdf0f6"
         }
     },
+    "bin": [
+        "nebula.exe",
+        "nebula-cert.exe"
+    ],
     "checkver": "github",
     "autoupdate": {
         "architecture": {
@@ -27,9 +31,5 @@
             "url": "$baseurl/SHASUM256.txt",
             "regex": "$sha256\\s+$basename"
         }
-    },
-    "bin": [
-        "nebula.exe",
-        "nebula-cert.exe"
-    ]
+    }
 }
