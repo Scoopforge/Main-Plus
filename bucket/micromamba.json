@@ -6,6 +6,7 @@
     "url": "https://micro.mamba.pm/api/micromamba/win-64/latest#/dl.tar.bz2",
     "hash": "01a89be3d83786b1258ff388f70e641b036852f7cac0a0f6fd051889f21962ea",
     "bin": "Library\\bin\\micromamba.exe",
+    "env_add_path": "envs\\base",
     "persist": [
         "envs",
         "condabin",
