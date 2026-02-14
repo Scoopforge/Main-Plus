@@ -93,7 +93,6 @@ scoop config aria2-min-split-size 4M
 |          [cryptomator-cli](https://github.com/cryptomator/cli)          |   Rust   |       ✓       |
 |          [cxx2flow](https://github.com/Enter-tainer/cxx2flow)           |   Rust   |       ✓       |
 | [excalidraw-converter](https://github.com/sindrel/excalidraw-converter) |    Go    |       ✓       |
-|                [flow-control](https://flow-control.dev)                 |   Zig    |       ✓       |
 |            [fresh-editor](https://github.com/sinelaw/fresh)             |   Rust   |       ✓       |
 |               [gauth](https://github.com/pcarrier/gauth)                |    Go    |       ✓       |
 |         [json-tui](https://github.com/ArthurSonzogni/json-tui)          |   C++    |       ✓       |
