@@ -1,6 +1,6 @@
 {
     "version": "0.4.2",
-    "description": "A Typst package CLI tool",
+    "description": "Typst package CLI tool",
     "homepage": "https://github.com/sjfhsjfh/typship",
     "license": "MIT",
     "architecture": {

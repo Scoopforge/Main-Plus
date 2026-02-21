@@ -111,6 +111,7 @@ scoop config aria2-min-split-size 4M
 |              [sttr](https://github.com/abhimanyu003/sttr)               |    Go    |       ✓       |
 |            [tex-fmt](https://github.com/WGUNDERWOOD/tex-fmt)            |   Rust   |       ✓       |
 |             [typship](https://github.com/sjfhsjfh/typship)              |   Rust   |       ✓       |
+|              [typdiff](https://github.com/sou1118/typdiff)              |   Rust   |       ✓       |
 |              [witr](https://github.com/pranshuparmar/witr)              |    Go    |       ✓       |
 |         [wthrr](https://github.com/ttytm/wthrr-the-weathercrab)         |   Rust   |       ✓       |
 |               [yutu](https://github.com/eat-pray-ai/yutu)               |    Go    |       ✓       |
