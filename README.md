@@ -89,8 +89,8 @@ scoop config aria2-min-split-size 4M
 |     [cargo-update](https://github.com/nabijaczleweli/cargo-update)      |   Rust   |       ✓       |
 |             [chatgpt-cli](https://github.com/j178/chatgpt)              |    Go    |       ✓       |
 |            [choose](https://github.com/theryangeary/choose)             |   Rust   |       ✓       |
-|                   [commix](https://commixproject.com)                   |   Rust   |       ✓       |
-|          [cryptomator-cli](https://github.com/cryptomator/cli)          |   Rust   |       ✓       |
+|                   [commix](https://commixproject.com)                   |  Python  |       ✓       |
+|          [cryptomator-cli](https://github.com/cryptomator/cli)          |   Java   |       ✓       |
 |          [cxx2flow](https://github.com/Enter-tainer/cxx2flow)           |   Rust   |       ✓       |
 | [excalidraw-converter](https://github.com/sindrel/excalidraw-converter) |    Go    |       ✓       |
 |            [fresh-editor](https://github.com/sinelaw/fresh)             |   Rust   |       ✓       |
