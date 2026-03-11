@@ -96,7 +96,6 @@ scoop config aria2-min-split-size 4M
 |            [fresh-editor](https://github.com/sinelaw/fresh)             |   Rust   |       ✓       |
 |               [gauth](https://github.com/pcarrier/gauth)                |    Go    |       ✓       |
 |         [json-tui](https://github.com/ArthurSonzogni/json-tui)          |   C++    |       ✓       |
-|              [lazyssh](https://github.com/Adembc/lazyssh)               |    Go    |       ✓       |
 |        [ltex-ls-plus](https://github.com/ltex-plus/ltex-ls-plus)        |  Kotlin  |       ✓       |
 |            [micromamba](https://github.com/mamba-org/mamba)             |   C++    |       ✓       |
 |               [nebula](https://github.com/slackhq/nebula)               |    Go    |       ✓       |
