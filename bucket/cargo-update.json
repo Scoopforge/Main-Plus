@@ -1,11 +1,11 @@
 {
-    "version": "18.1.1",
+    "version": "18.2.0",
     "description": "A cargo subcommand for checking and applying updates to installed executables",
     "homepage": "https://github.com/nabijaczleweli/cargo-update",
     "license": "MIT",
-    "url": "https://github.com/nabijaczleweli/cargo-update/releases/download/v18.1.1/cargo-update-v18.1.1.zip",
-    "hash": "fd2253af442dc3c0cc09997b3a6f5f1d6147bd83a2b1b31db6d8105f30aca54d",
-    "extract_dir": "cargo-update-v18.1.1",
+    "url": "https://github.com/nabijaczleweli/cargo-update/releases/download/v18.2.0/cargo-update-v18.2.0.zip",
+    "hash": "a3966cfe14d2a3beea5c4673a433ce64c06bcaf7bc3f9607caaec4b71b0982e7",
+    "extract_dir": "cargo-update-v18.2.0",
     "bin": [
         "cargo-install-update.exe",
         "cargo-install-update-config.exe"
