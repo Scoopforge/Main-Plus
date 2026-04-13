@@ -84,7 +84,7 @@ scoop config aria2-min-split-size 4M
 ## ⭐️ Summary
 
 |                                   App                                   | Language | Auto-Update ? |
-|:-----------------------------------------------------------------------:|:--------:|:-------------:|
+| :---------------------------------------------------------------------: | :------: | :-----------: |
 |          [cargo-dist](https://github.com/axodotdev/cargo-dist)          |   Rust   |       ✓       |
 |     [cargo-update](https://github.com/nabijaczleweli/cargo-update)      |   Rust   |       ✓       |
 |             [chatgpt-cli](https://github.com/j178/chatgpt)              |    Go    |       ✓       |
@@ -94,6 +94,7 @@ scoop config aria2-min-split-size 4M
 |          [cxx2flow](https://github.com/Enter-tainer/cxx2flow)           |   Rust   |       ✓       |
 | [excalidraw-converter](https://github.com/sindrel/excalidraw-converter) |    Go    |       ✓       |
 |               [gauth](https://github.com/pcarrier/gauth)                |    Go    |       ✓       |
+|             [gotmail](https://github.com/ivaquero/gotmail)              |    Go    |       ✓       |
 |         [json-tui](https://github.com/ArthurSonzogni/json-tui)          |   C++    |       ✓       |
 |        [ltex-ls-plus](https://github.com/ltex-plus/ltex-ls-plus)        |  Kotlin  |       ✓       |
 |            [micromamba](https://github.com/mamba-org/mamba)             |   C++    |       ✓       |
