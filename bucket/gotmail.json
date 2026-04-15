@@ -1,20 +1,20 @@
 {
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "A temporary email CLI tool written in Go",
     "homepage": "https://github.com/ivaquero/gotmail",
     "license": "MIT",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/ivaquero/gotmail/releases/download/v0.3.0/gotmail_0.3.0_windows_amd64.tar.gz#/gotmail.tar.gz",
-            "hash": "4128d5b6660901a58d38077fefa33ff8482f564f29817965faedd5440aeaa6d9"
+            "url": "https://github.com/ivaquero/gotmail/releases/download/v0.3.1/gotmail_0.3.1_windows_amd64.tar.gz#/gotmail.tar.gz",
+            "hash": "044b350c50ad67ec7f1cc435e797cb13abae0c10817aa9708ea4278461838280"
         },
         "32bit": {
-            "url": "https://github.com/ivaquero/gotmail/releases/download/v0.3.0/gotmail_0.3.0_windows_386.tar.gz#/gotmail.tar.gz",
-            "hash": "7d6fea93a00b78d453180d9fd77c11bd379aa678b92648af8a39c134ead15916"
+            "url": "https://github.com/ivaquero/gotmail/releases/download/v0.3.1/gotmail_0.3.1_windows_386.tar.gz#/gotmail.tar.gz",
+            "hash": "4d0950e2dd8891200e99480975bb38b58bb831ce476f4306ef803818bd3ef0f1"
         },
         "arm64": {
-            "url": "https://github.com/ivaquero/gotmail/releases/download/v0.3.0/gotmail_0.3.0_windows_arm64.tar.gz#/gotmail.tar.gz",
-            "hash": "ca1a38c95aa7b98d1823652fbf2238123fef1406b8eaedcb7814257c8069f6a1"
+            "url": "https://github.com/ivaquero/gotmail/releases/download/v0.3.1/gotmail_0.3.1_windows_arm64.tar.gz#/gotmail.tar.gz",
+            "hash": "3242b069021199b14f06c42a633d2ea58e2177daf02e844d7c7fd91ce212c836"
         }
     },
     "bin": "gotmail.exe",
@@ -28,7 +28,7 @@
                 "url": "https://github.com/ivaquero/gotmail/releases/download/v$version/gotmail_$version_windows_386.tar.gz#/gotmail.tar.gz"
             },
             "arm64": {
-                "url": "https://github.com/ivaquero/gotmail/releases/download/v$version/gotmail_$version_windows_arm64.tar.gz/gotmail.tar.gz"
+                "url": "https://github.com/ivaquero/gotmail/releases/download/v$version/gotmail_$version_windows_arm64.tar.gz#/gotmail.tar.gz"
             }
         }
     }
