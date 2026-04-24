@@ -96,6 +96,7 @@ scoop config aria2-min-split-size 4M
 |               [gauth](https://github.com/pcarrier/gauth)                |    Go    |       ✓       |
 |             [gotmail](https://github.com/ivaquero/gotmail)              |    Go    |       ✓       |
 |         [json-tui](https://github.com/ArthurSonzogni/json-tui)          |   C++    |       ✓       |
+|           [llama.cpp](https://github.com/ggml-org/llama.cpp)            |  Kotlin  |       ✓       |
 |        [ltex-ls-plus](https://github.com/ltex-plus/ltex-ls-plus)        |  Kotlin  |       ✓       |
 |            [micromamba](https://github.com/mamba-org/mamba)             |   C++    |       ✓       |
 |               [nebula](https://github.com/slackhq/nebula)               |    Go    |       ✓       |
