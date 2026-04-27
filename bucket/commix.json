@@ -1,6 +1,6 @@
 {
     "version": "4.1",
-    "description": "Automated All-in-One OS Command Injection Exploitation Tool.",
+    "description": "Automated All-in-One OS Command Injection Exploitation Tool",
     "homepage": "https://commixproject.com",
     "license": "https://github.com/commixproject/commix/blob/master/LICENSE.txt",
     "notes": "Commix is currently not support python 3.12 in v3.9, please use python 3.11 instead.`",

@@ -1,6 +1,6 @@
 {
     "version": "1.5.6",
-    "description": "A command line tool for porting Excalidraw diagrams to Gliffy and draw.io.",
+    "description": "A command line tool for porting Excalidraw diagrams to Gliffy and draw.io",
     "homepage": "https://github.com/sindrel/excalidraw-converter",
     "license": "MIT",
     "architecture": {

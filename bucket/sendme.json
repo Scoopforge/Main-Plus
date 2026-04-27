@@ -1,6 +1,6 @@
 {
     "version": "0.33.0",
-    "description": "A tool to send files and directories, based on iroh.",
+    "description": "A tool to send files and directories, based on iroh",
     "homepage": "https://github.com/n0-computer/sendme",
     "license": "MIT",
     "architecture": {

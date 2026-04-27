@@ -1,6 +1,6 @@
 {
     "version": "0.5.7",
-    "description": "An extremely fast LaTeX formatter written in Rust.",
+    "description": "An extremely fast LaTeX formatter written in Rust",
     "homepage": "https://github.com/WGUNDERWOOD/tex-fmt",
     "license": "MIT",
     "architecture": {

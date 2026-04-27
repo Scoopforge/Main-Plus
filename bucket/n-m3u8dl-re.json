@@ -1,6 +1,6 @@
 {
     "version": "0.5.1-beta",
-    "description": "A modern and powerful stream downloader for MPD/M3U8/ISM.",
+    "description": "A modern and powerful stream downloader for MPD/M3U8/ISM",
     "homepage": "https://github.com/nilaoda/N_m3u8DL-RE",
     "license": "MIT",
     "suggest": {
