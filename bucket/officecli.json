@@ -1,7 +1,7 @@
 {
     "version": "1.0.55",
     "description": "OfficeCLI is the world's first and the best command-line designed for AI agents",
-    "homepage": "https://github.com/iOfficeAI/OfficeCLI",
+    "homepage": "https://officecli.ai/",
     "license": "Apache-2.0",
     "architecture": {
         "64bit": {
@@ -14,7 +14,9 @@
         }
     },
     "bin": "officecli.exe",
-    "checkver": "github",
+    "checkver": {
+        "github": "https://github.com/iOfficeAI/OfficeCLI"
+    },
     "autoupdate": {
         "architecture": {
             "64bit": {
