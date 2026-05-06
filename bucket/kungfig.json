@@ -1,0 +1,21 @@
+{
+    "version": "0.0.2",
+    "description": "A cross-platform configuration manager",
+    "homepage": "https://github.com/ivaquero/kungfig",
+    "license": "MIT",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/ivaquero/kungfig/releases/download/v0.0.2/kungfig-windows.exe#/kungfig.exe",
+            "hash": "b0faf5a2ca3ec11515a908b1e695f3533b33cf7664716f0dd5fa6614c424a857"
+        }
+    },
+    "bin": "kungfig.exe",
+    "checkver": "github",
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/ivaquero/kungfig/releases/download/v$version/kungfig-windows.exe#/kungfig.exe"
+            }
+        }
+    }
+}

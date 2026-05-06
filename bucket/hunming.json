@@ -1,0 +1,21 @@
+{
+    "version": "0.0.1",
+    "description": "Cross-platform alias manager for Bash, Zsh, and PowerShell",
+    "homepage": "https://github.com/ivaquero/hunming",
+    "license": "MIT",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/ivaquero/hunming/releases/download/v0.0.1/hunming-windows.exe#/hunming.exe",
+            "hash": "886a4c0902c4f40ec1390857d155150b18f8515c5848aba74ec129ba3e0dc34e"
+        }
+    },
+    "bin": "hunming.exe",
+    "checkver": "github",
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/ivaquero/hunming/releases/download/v$version/hunming-windows.exe#/hunming.exe"
+            }
+        }
+    }
+}
