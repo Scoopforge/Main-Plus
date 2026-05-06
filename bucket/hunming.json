@@ -5,8 +5,12 @@
     "license": "MIT",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/ivaquero/hunming/releases/download/v0.0.1/hunming-windows.exe#/hunming.exe",
-            "hash": "886a4c0902c4f40ec1390857d155150b18f8515c5848aba74ec129ba3e0dc34e"
+            "url": "https://github.com/ivaquero/hunming/releases/download/v0.0.1/hunming-x86_64-pc-windows-msvc.zip#/hunming.zip",
+            "hash": "ec88dcdcc2d9e180225f3a0a3c364e33fd8877efd7a297a3a08317c0259105bf"
+        },
+        "arm64": {
+            "url": "https://github.com/ivaquero/hunming/releases/download/v0.0.1/hunming-aarch64-pc-windows-msvc.zip#/hunming.zip",
+            "hash": "d7d7cfac491db0306d2dbcac03cfc1b851f35f0abf3d96a2deaba00c3dcde484"
         }
     },
     "bin": "hunming.exe",
@@ -14,7 +18,10 @@
     "autoupdate": {
         "architecture": {
             "64bit": {
-                "url": "https://github.com/ivaquero/hunming/releases/download/v$version/hunming-windows.exe#/hunming.exe"
+                "url": "https://github.com/ivaquero/hunming/releases/download/v$version/hunming-x86_64-pc-windows-msvc.zip#/hunming.zip"
+            },
+            "arm64": {
+                "url": "https://github.com/ivaquero/hunming/releases/download/v$version/hunming-aarch64-pc-windows-msvc.zip#/hunming.zip"
             }
         }
     }
