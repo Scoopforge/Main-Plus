@@ -1,10 +1,10 @@
 {
-    "version": "2.7.0-0",
+    "version": "2.8.0-0",
     "description": "The Fast Cross-Platform Package Manager",
     "homepage": "https://github.com/mamba-org/mamba",
     "license": "BSD-3-Clause",
     "url": "https://micro.mamba.pm/api/micromamba/win-64/latest#/dl.tar.bz2",
-    "hash": "d5e1309923baab8434e890a956816221c40cae08d0a8b49276df77c6ae8d3e6d",
+    "hash": "ea89c5edf8b98bcd428ff0c57ba0f935397c3a59a7eaff794d9e64c4e4675208",
     "bin": "Library\\bin\\micromamba.exe",
     "env_add_path": "envs\\base",
     "persist": [
