@@ -3,6 +3,10 @@
     "description": "The Fast Cross-Platform Package Manager",
     "homepage": "https://github.com/mamba-org/mamba",
     "license": "BSD-3-Clause",
+    "notes": [
+        "Activate Micromamba in PowerShell",
+        "micromamba shell init --shell powershell --root-prefix=~/.local/share/mamba"
+    ],
     "url": "https://micro.mamba.pm/api/micromamba/win-64/latest#/dl.tar.bz2",
     "hash": "8648c6d302bb6d7432e5d620bc862c2be14c00f39ddd7e10c5eb6d73250dbba1",
     "bin": "Library\\bin\\micromamba.exe",
