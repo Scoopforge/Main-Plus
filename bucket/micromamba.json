@@ -1,5 +1,5 @@
 {
-    "version": "2.8.1-0",
+    "version": "2.8.1-1",
     "description": "The Fast Cross-Platform Package Manager",
     "homepage": "https://github.com/mamba-org/mamba",
     "license": "BSD-3-Clause",
@@ -8,7 +8,7 @@
         "micromamba shell init --shell powershell --root-prefix=~/.local/share/mamba"
     ],
     "url": "https://micro.mamba.pm/api/micromamba/win-64/latest#/dl.tar.bz2",
-    "hash": "8648c6d302bb6d7432e5d620bc862c2be14c00f39ddd7e10c5eb6d73250dbba1",
+    "hash": "e82874c473688860d087dfe825e1a52ae9deaf8099c7edaf3caff80e2687ed5d",
     "bin": "Library\\bin\\micromamba.exe",
     "env_add_path": "envs\\base",
     "persist": [
