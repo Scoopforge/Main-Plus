@@ -104,7 +104,6 @@ scoop config aria2-min-split-size 4M
 |        [neocmakelsp](https://github.com/neocmakelsp/neocmakelsp)        |    Rust    |       ✓       |
 |          [n-m3u8dl-re](https://github.com/nilaoda/N_m3u8DL-RE)          |     C#     |       ✓       |
 |                    [officecli](https://officecli.ai)                    |     C#     |       ✓       |
-|               [pixi](https://github.com/prefix-dev/pixi)                |    Rust    |       ✓       |
 |                         [qlty](https://qlty.sh)                         |    Rust    |       ✓       |
 |                      [rheo](https://rheo.ohrg.org)                      |    Rust    |       ✓       |
 |             [sendme](https://github.com/n0-computer/sendme)             |    Rust    |       ✓       |
