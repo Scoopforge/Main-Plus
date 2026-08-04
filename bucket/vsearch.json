@@ -2,7 +2,7 @@
     "version": "2.31.0",
     "description": "Versatile open-source tool for microbiome analysis",
     "homepage": "https://torognes.github.io/vsearch",
-    "license": "MIT",
+    "license": "GPL-3.0-only",
     "architecture": {
         "64bit": {
             "url": "https://github.com/torognes/vsearch/releases/download/v2.31.0/vsearch-2.31.0-win-x86_64.zip",
