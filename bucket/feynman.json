@@ -21,8 +21,8 @@
         "architecture": {
             "64bit": {
                 "url": "https://github.com/companion-inc/feynman/releases/download/v$version/feynman-$version-win32-x64.zip"
-            },
-            "extract_dir": "feynman-$version-win32-x64"
-        }
+            }
+        },
+        "extract_dir": "feynman-$version-win32-x64"
     }
 }
