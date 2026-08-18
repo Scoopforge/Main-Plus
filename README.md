@@ -112,7 +112,6 @@ scoop config aria2-min-split-size 4M
 |           [shiroa](https://github.com/Myriad-Dreamin/shiroa)            |    Rust    |       ✓       |
 |              [sttr](https://github.com/abhimanyu003/sttr)               |     Go     |       ✓       |
 |            [tex-fmt](https://github.com/WGUNDERWOOD/tex-fmt)            |    Rust    |       ✓       |
-|             [typship](https://github.com/sjfhsjfh/typship)              |    Rust    |       ✓       |
 |              [typdiff](https://github.com/sou1118/typdiff)              |    Rust    |       ✓       |
 |          [typst-ts](https://myriad-dreamin.github.io/typst.ts)          | Typescript |       ✓       |
 |         [wthrr](https://github.com/ttytm/wthrr-the-weathercrab)         |    Rust    |       ✓       |
