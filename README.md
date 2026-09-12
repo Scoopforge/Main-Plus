@@ -93,6 +93,7 @@ scoop config aria2-min-split-size 4M
 |          [cryptomator-cli](https://github.com/cryptomator/cli)          |    Java    |       ✓       |
 |          [cxx2flow](https://github.com/Enter-tainer/cxx2flow)           |    Rust    |       ✓       |
 | [excalidraw-converter](https://github.com/sindrel/excalidraw-converter) |     Go     |       ✓       |
+|                      [feynman](https://feynman.is)                      |   Python   |       ✓       |
 |               [gauth](https://github.com/pcarrier/gauth)                |     Go     |       ✓       |
 |             [gotmail](https://github.com/ivaquero/gotmail)              |     Go     |       ✓       |
 |             [hunming](https://github.com/ivaquero/hunming)              |    Rust    |       ✓       |
@@ -104,6 +105,7 @@ scoop config aria2-min-split-size 4M
 |        [neocmakelsp](https://github.com/neocmakelsp/neocmakelsp)        |    Rust    |       ✓       |
 |          [n-m3u8dl-re](https://github.com/nilaoda/N_m3u8DL-RE)          |     C#     |       ✓       |
 |                    [officecli](https://officecli.ai)                    |     C#     |       ✓       |
+|                 [openresearch](https://openresearch.sh)                 |     Go     |       ✓       |
 |                         [qlty](https://qlty.sh)                         |    Rust    |       ✓       |
 |                      [rheo](https://rheo.ohrg.org)                      |    Rust    |       ✓       |
 |             [sendme](https://github.com/n0-computer/sendme)             |    Rust    |       ✓       |
