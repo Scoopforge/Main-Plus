@@ -1,6 +1,6 @@
 {
     "version": "1.12.1",
-    "description": "A hybrid architecture code review tool: deterministic pipelines + LLM Agent, precise line-level comments, built-in multi-language ruleset.",
+    "description": "A hybrid architecture code review tool",
     "homepage": "https://open-codereview.ai/",
     "license": "Apache-2.0",
     "architecture": {
