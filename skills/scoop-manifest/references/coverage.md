@@ -1,305 +1,360 @@
 # Coverage: where the recipes come from
 
-`assets/recipes.json` was not drawn from a blank page, and it is not meant to be
-exhaustive. This document records the survey of the upstream bucket that sized
-the catalog, maps every recipe onto the upstream population it covers, and states
-what was deliberately left out. Read it when a manifest in front of you does not
-obviously match a recipe: the two questions are "which upstream shape is this?"
-and "is it one of the known gaps?".
+`assets/recipes.jsonc` was not drawn from a blank page, and it is not meant to be
+exhaustive. This document records the survey that sized the catalog, maps every
+recipe onto the population it covers, and states what was deliberately left out.
+Read it when a manifest in front of you does not obviously match a recipe: the
+two questions are "which upstream shape is this?" and "is it one of the known
+gaps?".
 
-Sections 1-6 are the survey, 7 is the mapping, 8 the gaps, 9 the rejected ideas
-and 10 the re-run recipe.
+Sections 1-2 are the method and the two corpora, 3-8 the survey, 9 the mapping,
+10 the gaps, 11 the re-run recipe.
 
 ## 1. Method
 
-- Corpus: `C:\Scoop\buckets\extras\bucket` — the upstream
-  `ScoopInstaller/Extras` bucket, **2389** `*.json` manifests, against the 56 in
-  this repo.
-- Offline and read-only: every file is `json.loads`-ed and tallied with
-  `Counter` over top-level keys, checkver shapes, autoupdate shapes, URL
-  extensions, `#` fragments and feature flags. Nothing is downloaded.
-- "manifests" below means *how many files* show a trait, and one file counts at
-  most once per trait. Tables that count URLs instead of files say so.
-- Measured 2026-09-19. Upstream moves, so the absolute numbers are a snapshot and
-  the proportions are the durable part. Section 9 has the re-run recipe.
+Two corpora, both read offline:
 
-## 2. Corpus shape
+- `C:\Scoop\buckets\main\bucket` -- the upstream `ScoopInstaller/Main` bucket,
+  **1653** `*.json` manifests and **6340** URLs. This is the corpus the catalog
+  is sized against now, because Main-Plus is an enhancement of that bucket and
+  inherits its shape.
+- `C:\Scoop\buckets\main-plus\bucket` -- this repo, **39** manifests. Quoted
+  separately wherever it disagrees with upstream, which it often does.
+- The earlier survey of `C:\Scoop\buckets\extras\bucket` (upstream
+  `ScoopInstaller/Extras`, **2389** manifests, **7853** URLs) is still quoted in
+  section 2, because it is what the original recipes were shaped by.
 
-The four required fields are on all 2389 files by definition. Everything else:
+Every file is `json.loads`-ed and tallied; nothing is downloaded. "manifests" or
+"files" below means *how many files* show a trait, and one file counts at most
+once per trait. Rows that count URLs instead say so.
 
-| Field                      |     Files | Field            | Files |
-| :------------------------- | --------: | :--------------- | ----: |
-| `version` / `description`  |      2389 | `installer`      |   154 |
-| `homepage` / `license`     |      2389 | `uninstaller`    |   127 |
-| `autoupdate`               |      2210 | `innosetup`      |   124 |
-| `checkver`                 |      2199 | `pre_uninstall`  |    93 |
-| `shortcuts`                |      1843 | `depends`        |    67 |
-| `architecture`             |      1688 | `##`             |    54 |
-| `bin`                      |      1428 | `env_set`        |    44 |
-| `url` + `hash` (top level) |       831 | `extract_to`     |    29 |
-| `persist`                  |       704 | `env_add_path`   |    28 |
-| `pre_install`              |       612 | `post_uninstall` |    18 |
-| `extract_dir`              |       566 | `psmodule`       |    18 |
-| `notes`                    |       318 | `_comment`       |     1 |
-| `suggest` / `post_install` | 315 / 227 |                  |       |
+Measured 2026-09-20. Upstream moves, so the absolute numbers are a snapshot and
+the proportions are the durable part. Section 11 has the re-run recipe.
 
-Three figures matter for maintenance:
+## 2. Two buckets, two shapes
 
-- **175 manifests have neither `checkver` nor `autoupdate`** (190 lack checkver
-  alone, 179 lack autoupdate alone). Excavator can never refresh those: they are
-  hand-bumped or already stale. `lint` reports this as a warning, not an error,
-  because it is a legitimate choice for abandoned software.
-- **54 manifests use the `##` key** and exactly one uses `_comment`. `##` is
-  Scoop's documented in-manifest comment; `_comment` is not, and is a typo.
-- `pre_install` (612) outnumbers `post_install` (227) by almost three to one, so
-  preparation before extraction is far more common than cleanup after it.
+The two upstream buckets are not variations on a theme; they are opposites in
+the one place that matters most, namely how a package reaches the user.
 
-## 3. checkver shapes
+| Trait                    |      Extras (2389) | Main (1653) | This repo (39) |
+| :----------------------- | -----------------: | ----------: | -------------: |
+| `bin`                    |        1428 (60%) |  1517 (92%) |       38 (97%) |
+| `shortcuts`              |        1843 (77%) |     53 (3%) |              0 |
+| `architecture`           |               1688 |        1365 |             33 |
+| `checkver`               |               2199 |        1567 |             39 |
+| `autoupdate`             |               2210 |        1575 |             39 |
+| top-level `url` + `hash` |                831 |         322 |              6 |
+| `persist`                |                704 |         152 |              3 |
+| `env_set`                |                 44 |         106 |              1 |
+| `env_add_path`           |                 28 |          88 |              1 |
+| `installer`              |                154 |          46 |              0 |
+| `innosetup`              |                124 |          22 |              0 |
+| `psmodule`               |                 18 |           9 |              1 |
+| `##`                     |                 54 |          14 |              0 |
+
+Extras is a **desktop** bucket: a Start-menu shortcut is the normal way to hand
+a package over, and `bin` is the exception. Main is a **CLI** bucket: `bin` is
+near-universal and `shortcuts` is rounding error. That is why the catalog leads
+with `github-cli-archive`, and why `shortcut_exe` stopped being a required
+parameter of `github-nsis-7z`, `github-innosetup` and `github-single-exe` -- in
+this repo it would have been wrong more often than right.
+
+## 3. Corpus shape
+
+The four required fields are on all 1653 files by definition. Everything else:
+
+| Field                      | Files | Field            | Files |
+| :------------------------- | ----: | :--------------- | ----: |
+| `version` / `description`  |  1653 | `post_install`   |    74 |
+| `homepage` / `license`     |  1653 | `depends`        |    56 |
+| `autoupdate`               |  1575 | `shortcuts`      |    53 |
+| `checkver`                 |  1567 | `installer`      |    46 |
+| `bin`                      |  1517 | `uninstaller`    |    34 |
+| `architecture`             |  1365 | `innosetup`      |    22 |
+| `url` + `hash` (top level) |   322 | `##`             |    14 |
+| `suggest`                  |   245 | `psmodule`       |     9 |
+| `extract_dir`              |   241 | `pre_uninstall`  |     9 |
+| `notes`                    |   171 | `extract_to`     |     7 |
+| `pre_install`              |   161 | `post_uninstall` |     7 |
+| `persist`                  |   152 |                  |       |
+| `env_set`                  |   106 |                  |       |
+| `env_add_path`             |    88 |                  |       |
+
+Four figures matter for maintenance:
+
+- **74 manifests have neither `checkver` nor `autoupdate`** (86 lack checkver
+  alone, 78 lack autoupdate alone). Excavator can never refresh those. `lint`
+  reports it as a warning, not an error, because it is a legitimate choice for
+  abandoned software. Extras had 175 of 2389, so the habit is more common there.
+- **83 manifests put an `api.github.com` URL in `checkver.github`** (5.0%, against
+  5.9% in Extras). Scoop appends `/releases/latest` unconditionally, so those
+  values resolve to `.../releases/latest/releases/latest` and 404. Rule `W111`;
+  the fix is to move the endpoint into `checkver.url`.
+- **29 manifests carry `architecture` but give `autoupdate` only a flat `url`**,
+  so Excavator refreshes one URL and silently leaves the per-architecture ones
+  pinned. Rule `W103`; Extras had 148.
+- **`license` is an object on 127 files** (`{"identifier": ..., "url": ...}`) and
+  a plain string on 1526. Both forms are first class in `param_docs`.
+
+## 4. checkver shapes
 
 The shape is `json`-normalised: `str:` means the value is a bare string,
 `{a,b}` means an object with exactly those keys.
 
-| Shape                                                                       |  Files | Covered by                               |
-| :-------------------------------------------------------------------------- | -----: | :--------------------------------------- |
-| `{github}`                                                                  |    579 | every `github-*` recipe                  |
-| `str:github`                                                                |    563 | every `github-*` recipe                  |
-| `{regex,url}`                                                               |    474 | `webpage-regex`                          |
-| *(no checkver)*                                                             |    190 | —                                        |
-| `str:<regex>`                                                               |    147 | `webpage-regex`                          |
-| `{github,jsonpath,regex}`                                                   |    146 | `github-asset-jsonpath`                  |
-| `{github,regex}`                                                            |     60 | `github-asset-jsonpath`                  |
-| `{regex,script}`                                                            |     38 | `checkver-script`                        |
-| `{regex,replace,url}`                                                       |     34 | `webpage-regex`                          |
-| `{jsonpath,url}`                                                            |     31 | `api-jsonpath`                           |
-| `{regex,reverse,url}`                                                       |     25 | `webpage-regex`                          |
-| `{jsonpath,regex,url}`                                                      |     14 | `api-jsonpath`                           |
-| `{regex}`                                                                   |     13 | `checkver-script`                        |
-| `{regex,sourceforge}`                                                       |     10 | `sourceforge`                            |
-| `{regex,script,url}`                                                        |     10 | `checkver-script`                        |
-| `{regex,url,xpath}`                                                         |     10 | `webpage-regex`                          |
-| `{github,jsonpath,regex,replace}`                                           |      7 | `github-asset-jsonpath`                  |
-| `{regex,url,useragent}`                                                     |      5 | `webpage-regex`                          |
-| `{url,xpath}`                                                               |      5 | `webpage-regex`                          |
-| `{github,jsonpath,regex,script}`                                            |      4 | `checkver-script`                        |
-| `{github,jsonpath,regex,replace,script}`                                    |      1 | —                                        |
-| `{regex,replace}`                                                           |      4 | hand-written                             |
-| `{sourceforge}` / `str:sourceforge`                                         |  3 / 2 | `sourceforge`                            |
-| `{re,url}`                                                                  |      3 | `webpage-regex`                          |
-| `{github,jsonpath}`                                                         |      2 | `github-asset-jsonpath`                  |
-| `{regex,replace,sourceforge}` / `{regex,replace,script}`                    |  2 / 2 | hand-written                             |
-| `{jp,regex,url}` / `{jp,url}`                                               |  1 / 1 | `api-jsonpath` (`jp` aliases `jsonpath`) |
-| `{github,regex,replace}`, `{regex,reverse}`, `{jsonpath,regex,replace,url}` | 1 each | hand-written                             |
-
-**147 files put a bare regex string straight into `checkver`** — `"Version
-([\d.]+)"`, `"Latest version: ([\d.]+)"`, … — which makes it the largest single
-non-GitHub form and the reason `webpage-regex` accepts a recipe without
-`checkver_url`. Scoop reads that string as a regex and runs it against
-`$json.homepage`, because the default for the scrape target is the homepage
-(`bin/checkver.ps1`, "Not Specified"). The builder emits this shorthand only
-when the regex is the sole `checkver` key: `replace`, `reverse` and `useragent`
-all require the object form.
+| Shape                             | Files | Covered by              |
+| :-------------------------------- | ----: | :---------------------- |
+| `{github}`                        |   527 | every `github-*` recipe |
+| `str:github`                      |   506 | every `github-*` recipe |
+| `{regex,url}`                     |   228 | `webpage-regex`         |
+| *(no checkver)*                   |    86 | --                      |
+| `{github,jsonpath,regex}`         |    82 | `github-asset-jsonpath` |
+| `{github,regex}`                  |    51 | `github-asset-jsonpath` |
+| `str:<regex>`                     |    47 | `webpage-regex`         |
+| `{jsonpath,url}`                  |    30 | `api-jsonpath`          |
+| `{regex,replace,url}`             |    21 | `webpage-regex`         |
+| `{jsonpath,regex,url}`            |    16 | `api-jsonpath`          |
+| `{regex,reverse,url}`             |    11 | `webpage-regex`         |
+| `{regex,script}`                  |    10 | `checkver-script`       |
+| `{github,jsonpath,regex,replace}` |     6 | `github-asset-jsonpath` |
+| `{github,jsonpath}`               |     5 | `github-asset-jsonpath` |
+| `{regex,url,useragent}`           |     5 | `webpage-regex`         |
+| `{regex}`                         |     4 | `checkver-script`       |
+| `{jsonpath,regex,reverse,url}`    |     4 | `api-jsonpath`          |
+| `{regex,sourceforge}`             |     3 | `sourceforge`           |
+| `{url,xpath}` / `{regex,url,xpath}` | 2 / 2 | `webpage-regex`       |
+| `{regex,replace}`                 |     2 | hand-written            |
+| `{github,re}`                     |     1 | `github-asset-jsonpath` (`re` aliases `regex`) |
+| `{sourceforge}`                   |     1 | `sourceforge`           |
+| `{regex,replace,reverse,url}` / `{regex,script,url}` / `{github,jsonpath,regex,script}` | 1 each | hand-written |
 
 Per-modifier totals, which the recipes accept as optional parameters:
 
-| Modifier                                    | Files | Recipe parameter               |
-| :------------------------------------------ | ----: | :----------------------------- |
-| GitHub checkver (string **or** object form) |  1363 | `repo_url` / `checkver_github` |
-| `checkver.script`                           |    55 | `checkver_script`              |
-| `checkver.reverse`                          |    26 | `checkver_reverse`             |
-| `checkver.sourceforge`                      |    15 | `checkver_sourceforge`         |
-| `checkver.xpath`                            |    15 | `checkver_xpath`               |
-| `checkver.useragent`                        |     5 | `checkver_useragent`           |
+| Modifier                     | Files | Recipe parameter               |
+| :--------------------------- | ----: | :----------------------------- |
+| GitHub checkver (both forms) |  1033 | `repo_url` / `checkver_github` |
+| `checkver.regex`             |   448 | `checkver_regex`               |
+| `checkver.url`               |   321 | `checkver_url`                 |
+| `checkver.jsonpath`          |   144 | `checkver_jsonpath`            |
+| `checkver.replace`           |    30 | `checkver_replace`             |
+| `checkver.reverse`           |    16 | `checkver_reverse`             |
+| `checkver.script`            |    12 | `checkver_script`              |
+| `checkver.useragent`         |     5 | `checkver_useragent`           |
+| `checkver.xpath`             |     4 | `checkver_xpath`               |
+| `checkver.sourceforge`       |     4 | `checkver_sourceforge`         |
 
-GitHub is 57% of the corpus, which is why six of the sixteen recipes are
-GitHub-specific and why the non-GitHub ones lean on `url` + `regex`.
+GitHub is 66% of the corpus, denser than Extras (57%), so the six GitHub recipes
+carry most of this bucket. The bare-regex shorthand is still used 47 times: Scoop
+reads a bare string as a regex run against `$json.homepage`, which is why
+`webpage-regex` works without `checkver_url`.
 
-## 4. autoupdate shapes
+## 5. autoupdate shapes
 
-| Shape                                                                                                                |  Files |
-| :------------------------------------------------------------------------------------------------------------------- | -----: |
-| `{architecture}`                                                                                                     |   1106 |
-| `{url}`                                                                                                              |    520 |
-| `{architecture,hash}`                                                                                                |    318 |
-| *(no autoupdate)*                                                                                                    |    179 |
-| `{hash,url}`                                                                                                         |    124 |
-| `{extract_dir,url}`                                                                                                  |     65 |
-| `{architecture,extract_dir}`                                                                                         |     31 |
-| `{extract_dir,hash,url}`                                                                                             |     24 |
-| `{architecture,extract_dir,hash}`                                                                                    |     16 |
-| `{architecture,url}`, `{persist,url}`, `{architecture,notes}`, `{architecture,bin,hash}`, `{bin,hash,shortcuts,url}` | 1 each |
+| Shape                            | Files | Shape                             | Files |
+| :------------------------------- | ----: | :-------------------------------- | ----: |
+| `{architecture}`                 |   749 | `{extract_dir,hash,url}`          |    18 |
+| `{architecture,hash}`            |   510 | `{architecture,extract_dir,hash}` |    12 |
+| `{url}`                          |   145 | `{architecture,bin}`              |     3 |
+| *(no autoupdate)*                |    78 | `{architecture,hash,url}`         |     3 |
+| `{hash,url}`                     |    63 | `{architecture,url}`              |     3 |
+| `{extract_dir,url}`              |    37 | `{bin,url}`                       |     1 |
+| `{architecture,extract_dir}`     |    31 |                                   |       |
 
 Inside `autoupdate.architecture.<arch>` the member shape is almost always
-minimal: `{url}` on 1880 branches, `{hash,url}` on 185, `{extract_dir,url}` on
-185, with `{extract_dir,hash,url}` at 3 and `{bin,shortcuts}` at 2.
+minimal: `{url}` on 1823 branches, `{extract_dir,url}` on 286, `{hash,url}` on
+77, `{extract_dir}` on 13, `{extract_dir,hash,url}` on 9.
 
-The single defect worth naming: **148 manifests carry `architecture` but give
-`autoupdate` only a flat `url`**, so Excavator refreshes one URL and silently
-leaves the per-architecture ones pinned. This is rule `W103`; the same defect
-appears on 7 manifests in this repo.
+`autoupdate` is architecture-first (1259 of 1575 files) for the same reason
+`checkver` is GitHub-first: the two halves are built from the same release asset
+list.
 
-## 5. Architecture combinations
+## 6. Architecture combinations
 
-| Combination                                      | Files |
-| :----------------------------------------------- | ----: |
-| `64bit` only                                     |   860 |
-| `32bit` + `64bit`                                |   468 |
-| `64bit` + `arm64`                                |   230 |
-| `32bit` + `64bit` + `arm64`                      |   128 |
-| `arm64` only                                     |     2 |
-| no `architecture` block (top-level `url`/`hash`) |   701 |
+| Combination                 | Main | Extras |
+| :-------------------------- | ---: | -----: |
+| `64bit` only                |  603 |    860 |
+| `32bit` + `64bit`           |  348 |    468 |
+| no `architecture` block     |  288 |    701 |
+| `64bit` + `arm64`           |  233 |    230 |
+| `32bit` + `64bit` + `arm64` |  180 |    128 |
+| `arm64` only                |    1 |      2 |
 
-Two consequences for the builders. First, 701 manifests skip `architecture`
-entirely, so a recipe must be able to emit a flat `url`/`hash` pair and not a
-one-key `architecture` block — that is what `arch` defaulting to a single value
-achieves. Second, arm64 is still fringe (~15% of the files, and only 2 are
-arm64-only), so arm64 support is an option on each recipe rather than a
-first-class branch in the decision tree.
+Two consequences for the builders:
 
-## 6. Download shapes
+- **One architecture in a block beats no block at all** in this bucket: 603
+  against 288 upstream, and 19 against 6 in this repo. A recipe that always
+  collapses a single architecture into a top-level `url` would fight the local
+  convention, which is why `github-cli-archive`, `toolchain-env` and
+  `github-single-exe` set `arch_block` by default and `--flat-url` exists to
+  override it. The other recipes keep the historical collapsed form.
+- **32bit is surveyed but not supported.** It still appears on 528 upstream
+  files, so the distribution above has to account for it -- but this skill
+  refuses the value: `arch_list` rejects `32bit` outright and there is no
+  `--url32` / `--hash32` to feed it. arm64 is the only second architecture
+  worth modelling, at 414 files (360 in Extras), and it is never the only
+  architecture in practice.
+
+## 7. Download shapes
 
 Counted **per URL**, not per file, across every `url` / `url64` / `url32` /
-`url_arm64` at any nesting depth — **7853** URLs in total:
+`url_arm64` at any nesting depth -- **6340** URLs in total:
 
-| Extension | URLs |      | Extension                |   URLs |
-| :-------- | ---: | :--- | :----------------------- | -----: |
-| `.zip`    | 3184 |      | `.jar`                   |     27 |
-| `.exe`    | 1900 |      | `.msix`                  |     12 |
-| `.7z`     |  321 |      | `.rar`                   |     11 |
-| `.msi`    |  289 |      | `.cab`                   |      8 |
-| `.nupkg`  |  111 |      | `.tgz` / `.whl` / `.ps1` | 4 each |
-| `.tar.gz` |   68 |      | `.tar.xz` / `.gz`        |  2 / 3 |
+| Extension | URLs |     | Extension   | URLs |
+| :-------- | ---: | :-- | :---------- | ---: |
+| `.zip`    | 2902 |     | `.tar.lzma` |   31 |
+| `.exe`    |  945 |     | `.ps1`      |   30 |
+| `.tar.gz` |  422 |     | `.tar.zst`  |   24 |
+| `.txt`    |  316 |     | `.jar`      |   23 |
+| `.sha256` |  171 |     | `.tar.xz`   |   22 |
+| `.msi`    |  127 |     | `.nupkg`    |   17 |
+| `.7z`     |  110 |     | `.sha512`   |   17 |
+| `.html`   |   75 |     | `.tgz`      |   17 |
+| `.json`   |   51 |     | `.gz`       |   12 |
 
-Note the ordering: once the fragment is stripped, **`.exe` outnumbers `.7z` by
-roughly six to one**, which is the opposite of the impression a coarse count
-gives. Matching on the raw URL tail puts `app.exe#/dl.7z` in the `.7z` bucket —
-see the fragment table below for why that is the wrong reading.
-
-The remaining **1905 URLs carry no extension at all**, and most of those are not
-packages. **467** point at a checksum file or a `latest*.yml`, across 432 files,
-and 301 at a licence / EULA / terms page; the rest are bare download endpoints
-(`?download`, `?latest`, `?releases`, `?p=windows&type=release`). That
-467-URL checksum population is the reason `autoupdate.hash` exists, and **484**
-manifests declare it.
+**516 URLs carry no extension at all**, and most of those are not packages:
+`.txt`, `.sha256` and `.sha512` together account for 504 URLs, which is the
+sidecar-checksum population behind `autoupdate.hash` and the `au_hash_url`
+parameter. `.html`, `.json` and `.atom` point at checkver targets, not downloads.
 
 `#` fragments, again per URL:
 
-| Fragment                                         |   URLs | Meaning                                                 |
-| :----------------------------------------------- | -----: | :------------------------------------------------------ |
-| `#/dl.7z`                                        |    956 | rename an NSIS shell so Scoop unpacks it as 7z          |
-| `#/<name>.exe`                                   |    383 | pin the saved file name and keep it unpacked            |
-| `#/dl.zip`                                       |     54 | the same rename trick, for a zip payload                |
-| `#/dl.exe`                                       |     16 | keep the bare exe, do not unpack                        |
-| any `*.msi*` fragment                            |     17 | hand an MSI to Scoop untouched, `_msi_` being canonical |
-| `#/dl.7z_` / `#/dl.zip_`                         |  7 / 6 | the trailing underscore, same purpose as `_msi_`        |
-| trailing-underscore fragments of all forms       |     28 |                                                         |
-| `#/cosi.7z`, `#/didder.exe`, `#/hysteria.exe`, … | 6 each | the long tail of named fragments                        |
+| Fragment       |         URLs | Meaning                                        |
+| :------------- | -----------: | :--------------------------------------------- |
+| `#/dl.7z`      |          149 | rename an NSIS shell so Scoop unpacks it as 7z |
+| `#/dl.zip`     |           10 | the same rename trick, for a zip payload       |
+| `#/<tool>.exe` | the long tail | pin the saved name and keep it unpacked       |
+| `#/dl.msi`     |            4 | hand an MSI to Scoop untouched                 |
 
-`#/dl.7z` on 956 URLs across **365 files**, 213 of which also mention
-`$PLUGINSDIR`, is the evidence behind `github-nsis-7z`: it is not an edge case,
-it is the default shape of every Electron release.
+The named `#/<tool>.exe` fragment is far more common here than in Extras -- it is
+what a CLI release needs when the asset is called
+`mytool-x86_64-pc-windows-msvc.exe` and the shim has to be `mytool.exe`. Pass it
+in the URL; no recipe does the renaming for you.
 
-## 7. Recipe to upstream pattern
+Fifteen manifests download a `.tar.gz` but install from a `.zip` (or the other
+way round) because their `autoupdate` template disagrees with the checked-in URL.
+`typst-ts` in this repo is one of them: `url` ends in `.zip`, `autoupdate.url` in
+`.tar.gz`. Scoop copes, but the mismatch is a latent surprise.
+
+## 8. Install mechanics
+
+This is the section the catalog actually turns on.
+
+| Trait                                           | Files |
+| :---------------------------------------------- | ----: |
+| `bin`, no `shortcuts`                           |  1469 |
+| `bin`, no `shortcuts`, no `extract_dir`, no env |  1222 |
+| ... of those, with an `architecture` block      |  1066 |
+| ... of those, flat `url`/`hash`                 |   156 |
+| ... of those, a `.tar.*` payload                |   109 |
+| no `bin`, no `shortcuts`, no `psmodule`         |   123 |
+| ... of those, `env_add_path`                    |    67 |
+| ... of those, `extract_dir`                     |    34 |
+| ... of those, `env_set`                         |    33 |
+| ... of those, `persist`                         |    28 |
+| `installer.keep`                                |     2 |
+
+Two recipes were added on the strength of this table:
+
+- **`github-cli-archive`** for the 1469 top rows: an archive or bare exe whose
+  entire install is a PATH entry. It also swallows the `.tar.*` releases (142
+  files; 114 `.tar.gz`, 9 `.tgz`, 7 `.tar.xz`, 7 `.tar.lzma`, several files
+  carrying more than one), of which only 11 have a version-stamped `extract_dir`
+  -- the tarball usually expands in place, so no `extract_dir` is needed.
+- **`toolchain-env`** for the 123 bottom rows: a compiler / SDK / runtime that is
+  never shimmed and is wired up through `env_add_path` and `env_set` instead.
+  `ant` is the cleanest example -- no `bin`, `env_add_path: bin`,
+  `env_set: {ANT_HOME: $dir}`, a version-stamped `extract_dir`, and an
+  `uninstaller.script` that copies user libraries back to `persist_dir`.
+
+`github-cli-archive` and `github-portable-zip` can produce the same file. The
+overlap is deliberate: `github-cli-archive` is the stricter default for this
+repo -- it demands `bin_exe` (so you have to say what goes on PATH) and rejects
+`shortcut_exe` (a Start-menu entry means the package is not a CLI tool). Reach
+for `github-portable-zip` when the shortcut, the `extract_dir` or the
+environment variables are the point.
+
+## 9. Recipe to upstream pattern
 
 "Population" is the number of upstream files whose shape that recipe is built
-for. Where a recipe sits across two shapes the larger one is quoted.
+for; a file is quoted under the shape it fits best, so the column is not a
+partition.
 
-| Recipe                  | Upstream shape                                             |    Population |
-| :---------------------- | :--------------------------------------------------------- | ------------: |
-| `github-portable-zip`   | GitHub release, plain archive, top-level `url`+`hash`      |           831 |
-| `github-nsis-7z`        | NSIS shell with `#/dl.7z`, payload under `$PLUGINSDIR`     |           365 |
-| `github-innosetup`      | `innosetup: true`                                          |           124 |
-| `github-exe-installer`  | an `installer` block the release actually runs             |           154 |
-| `github-single-exe`     | bare `.exe`, no fragment, nothing to extract               |             4 |
-| `github-source-archive` | source tag archive, or a version-stamped `extract_dir`     |       1 + 566 |
-| `github-msi`            | `.msi` among the download URLs                             |           117 |
-| `github-asset-jsonpath` | GitHub checkver carrying `jsonpath`                        |           159 |
-| `webpage-regex`         | non-GitHub `url` + `regex`, plus the bare-string shorthand |     577 + 147 |
-| `api-jsonpath`          | non-GitHub `jsonpath` checkver                             |            47 |
-| `checkver-script`       | `checkver.script`                                          |            55 |
-| `sourceforge`           | `checkver.sourceforge`                                     |            15 |
-| `powershell-gallery`    | a `psmodule` block and a `.nupkg` download                 |            18 |
-| `redirect-arch`         | version-less permanent link (`/latest/`)                   |            32 |
-| `portable-multifile`    | `url` and `hash` as arrays                                 |            34 |
-| `github-git-clone`      | plugin cloned into a host app                              | 0 (this repo) |
+| Recipe                  | Upstream shape                                             |                Population |
+| :---------------------- | :--------------------------------------------------------- | ------------------------: |
+| `github-cli-archive`    | `bin` with no `shortcuts`                                  |                      1469 |
+| `github-portable-zip`   | archive plus a shortcut / `extract_dir` / env              |                       254 |
+| `webpage-regex`         | non-GitHub `url` + `regex`, plus the bare-string shorthand |                  228 + 47 |
+| `toolchain-env`         | no shim at all; env-driven                                 |                       123 |
+| `github-asset-jsonpath` | GitHub checkver carrying `jsonpath`                        | 82 + 51 + 6 + 5 + 1 = 145 |
+| `api-jsonpath`          | non-GitHub `jsonpath` checkver                             |                  30 + 16 + 4 = 50 |
+| `github-msi`            | `.msi` among the download URLs                             |                        50 |
+| `github-exe-installer`  | an `installer` block the release actually runs              |                        46 |
+| `github-nsis-7z`        | `#/dl.7z` on the URL                                       |                        40 |
+| `github-innosetup`      | `innosetup: true`                                          |                        22 |
+| `github-single-exe`     | the download is itself the executable                      |                        19 |
+| `redirect-arch`         | version-less permanent link (`/latest/`)                   |                        18 |
+| `checkver-script`       | `checkver.script`                                          |                        12 |
+| `powershell-gallery`    | a `psmodule` block and a `.nupkg` download                  |                         9 |
+| `github-source-archive` | `archive/refs/tags`, or a version-stamped `extract_dir`    |                         6 |
+| `portable-multifile`    | `url` and `hash` as arrays                                 |                         6 |
+| `sourceforge`           | `checkver.sourceforge`                                     |                         4 |
+| `github-git-clone`      | plugin cloned into a host app                              |           0 (Extras-Plus) |
 
-Two of those deserve a caveat rather than a number:
+Three of those deserve a caveat rather than a number:
 
-- `sourceforge`: **94** upstream files download from SourceForge, but only 15
-  use the dedicated `checkver.sourceforge` key. The other 79 scrape the project
-  page with `url` + `regex`, so they land in `webpage-regex`. Prefer the
-  dedicated key when writing new ones — it does not break when the page is
-  redesigned.
-- `github-git-clone`: **zero** upstream manifests contain `git clone`. It is a
-  this-repo pattern (`comfyui-manager`) and stays in the catalog for that reason
-  alone, not because upstream justified it.
+- `sourceforge`: **23** files download from a SourceForge mirror, but only 4 use
+  the dedicated `checkver.sourceforge` key. The rest scrape the project page and
+  land in `webpage-regex`. Prefer the dedicated key -- it does not break when the
+  page is redesigned.
+- `github-git-clone`: zero manifests here and upstream contain `git clone`. It is
+  an Extras-Plus pattern (`comfyui-manager`) and stays in the catalog for that
+  reason alone.
+- `github-single-exe`: in a bin-only bucket it lands on the same JSON as
+  `github-cli-archive`. Its reason to exist is the recipe's own text -- "the
+  download is the executable" -- which is the only case where a `#/<name>.exe`
+  fragment is the whole install.
 
-`webpage-regex` is the widest recipe for a reason: it absorbs three separately
-counted forms — `url` + `regex` (577 files), the bare-string shorthand (147) and
-the `xpath` variant (15) — because all three come down to "fetch one page, pull
-the version out of the text".
+Every **Samples** list in `recipes.md` cites files that exist in this corpus:
+this repo where a manifest of that shape exists there (11 of 18 recipes), and
+`ScoopInstaller/Main` otherwise. The samples replaced the
+`ScoopInstaller/Extras` ones the previous edition of the catalog carried, so a
+sample can now be opened next to the recipe and read.
 
-Sample manifests per recipe are listed in `recipes.md` under **Samples**. The
-nine original recipes cite files from this repo; the seven added for upstream
-coverage cite upstream files, because this repo has no manifest of those shapes.
-
-## 8. Not covered
+## 10. Not covered
 
 Known gaps, in rough order of how likely they are to bite:
 
-- **`checkver.script` cannot be probed offline.** The 55 upstream files that use
-  it, and `checkver-script`, need a live Scoop environment, so
-  `update --checkver` reports that it cannot run rather than guessing. Use
-  `bin/checkver.ps1` for those.
-- **140 manifests whose `checkver.github` is an `api.github.com` URL.** Scoop
-  appends `/releases/latest` unconditionally, so those values resolve to
-  `.../releases/latest/releases/latest` and 404. They never detect a version.
-  This is rule `W111`, it is a warning rather than an error because the fix is
-  to move the endpoint into `checkver.url`, and `86box` and
-  `adventuregamestudio` are live examples.
+- **`checkver.script` cannot be probed offline.** The 12 files that use it, and
+  `checkver-script`, need a live Scoop environment, so `update --checkver`
+  reports that it cannot run rather than guessing. Use `bin/checkver.ps1`.
+- **`autoupdate.bin` and `autoupdate.shortcuts`.** Four manifests
+  (`avr-gcc`, `capnp`, `influxdb`, `lua`) rewrite `bin` on every update. No
+  parameter emits that block; hand-edit those four.
+- **`installer.keep`.** `groovyserv` and `vcpkg` keep the installer file in
+  `$dir` after running it. Two files did not justify a parameter.
+- **`.jar` launchers.** 23 URLs are `.jar`, and they need a generated `.cmd`
+  shim in `installer.script`, which no recipe writes. Hand-write it.
 - **MSI customisation.** `github-msi` covers the two mechanical modes (unpack
   with `Expand-MsiArchive`, or hand to `msiexec`). Per-feature install, MST
   transforms and advertised shortcuts are not modelled.
 - **Installer interaction.** Anything that needs a click, a licence dialog or a
-  driver prompt is out of scope; `github-exe-installer` will scaffold the script,
-  but the body has to be written by hand.
+  driver prompt is out of scope; `github-exe-installer` scaffolds the script, but
+  the body has to be written by hand.
 - **Archives over 2 GB.** aria2 and hash verification degrade, so no recipe is
   tuned for them.
-- **The single `_comment` file.** Not a documented key; `##` is. The linter does
-  not currently flag it.
-- **The `checkver` shapes in the bottom rows of section 3.** Around a dozen
-  files combine `replace` with something else in a way only that manifest needs,
-  and section 4's last row is five one-off autoupdate shapes. Left to
-  hand-writing by design.
+- **`.msix`.** Zero in this corpus (12 in Extras). `github-msi` is the nearest
+  recipe; expect to hand-edit `pre_install`.
+- **The one-off shapes.** `{regex,replace}`, `{regex,replace,reverse,url}`,
+  `{regex,script,url}` and `{github,jsonpath,regex,script}` appear once each.
+  Left to hand-writing by design.
 
-## 9. Ideas that were measured and rejected
-
-Two plausible rules were checked against upstream and deliberately **not**
-implemented. They are recorded because the next person to look will have the
-same idea, and a wrong rule is worse than no rule.
-
-- **"`$version` glued to a letter is a mistake."** It looks like one — the
-  generator can produce `.../7zTM_$versionz` — but 7 upstream manifests do it on
-  purpose, because upstream really does glue the version into a suffix:
-  `firefox-esr` needs `releases/$versionesr/`, and `codeblocks-mingw` needs
-  `codeblocks-$versionmingw-nosetup.zip`. The token is correct in both. A
-  warning here would fire on healthy manifests, so `$version` is only checked
-  for *presence* (W110), never for its neighbourhood.
-- **"`extract_dir` must agree with `version`."** 111 of the 566 upstream
-  manifests put a version-like token in `extract_dir`, and only 17 of those
-  tokens differ from `version` — but all 17 are legitimate, because
-  `extract_dir` names what the archive *actually* extracts to, not what the
-  release is called. `ghidra` is `version: 12.1.3-20260817` against
-  `extract_dir: ghidra_12.1.3_PUBLIC`; `wing-101` is `12.0.3.0` against
-  `Wing 101 12.0.3`. So `update --version` rewrites the version hard-coded in
-  **URLs only** and leaves `extract_dir` alone — `--set extract_dir=...` when
-  upstream really did rename the directory.
-
-## 10. Refreshing the survey
+## 11. Refreshing the survey
 
 The survey script is deliberately **not** shipped: it is a one-off analysis, and
 keeping it in the package would make it look like a supported tool. To redo it,
-point the corpus path in section 1 at the bucket to measure and tally the same
-things — top-level keys, the four shape families, and the `#` fragments. If the
-proportions move far enough to invalidate a recipe (say arm64-only manifests
-stop being two files), update the affected recipe and the corresponding row here
-together, the way `sm_selftest.py` requires for `recipes.md`.
+point a read-only script at the bucket to measure and tally the same things --
+top-level keys, the four shape families, architecture combinations, URL
+extensions, `#` fragments, and the install-mechanics table in section 8. If the
+proportions move far enough to invalidate a recipe (say `shortcuts` climbs back
+above 10% and the bin-first default stops being obvious), update the recipe and
+the corresponding row here together, the way `sm_selftest.py` requires for
+`recipes.md`.

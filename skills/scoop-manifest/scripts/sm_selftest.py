@@ -103,7 +103,7 @@ class Checker:
 
 
 def check_recipes(check: Checker) -> None:
-    print("\n[1] recipe catalog <-> builders consistency")
+    print("\n[1] recipe catalog, builders and architecture policy")
     catalog = L.load_recipes()
     param_docs = catalog.get("param_docs", {})
     recipes = catalog["recipes"]
@@ -150,12 +150,69 @@ def check_recipes(check: Checker) -> None:
         not unimplemented, "no orphan builders", ", ".join(unimplemented) or "0"
     )
 
+    # 32bit was deliberately dropped: this bucket ships 64bit and arm64 only, so
+    # the whitelist, the parameter maps and every recipe must agree on that.
+    check.expect(
+        list(L.ARCH_ORDER) == ["64bit", "arm64"],
+        "the architecture whitelist is 64bit + arm64",
+        ", ".join(L.ARCH_ORDER),
+    )
+    stale_maps = sorted(
+        key
+        for mapping in (L.ARCH_PARAM, L.ARCH_HASH_PARAM)
+        for key in mapping
+        if key not in L.ARCH_ORDER
+    )
+    check.expect(
+        not stale_maps,
+        "every url/hash parameter map key is a supported architecture",
+        ", ".join(stale_maps),
+    )
+    for value in ("32bit", "64bit+32bit"):
+        try:
+            L.arch_list(value)
+        except L.SmError:
+            check.ok(f"arch_list rejects {value!r}")
+        else:
+            check.fail(f"arch_list accepted {value!r}, but 32bit is not supported")
+    try:
+        pair = L.arch_list("64bit+arm64")
+    except L.SmError as exc:
+        check.fail("arch_list rejects the supported pair 64bit+arm64", str(exc))
+    else:
+        check.expect(
+            pair == ["64bit", "arm64"],
+            "arch_list still accepts 64bit+arm64",
+            ", ".join(pair),
+        )
+
+    params = {
+        key
+        for recipe in recipes
+        for key in (*recipe.get("required", []), *recipe.get("optional", []))
+    }
+    check.expect(
+        not {k for k in params if k.endswith("32")},
+        "no recipe declares a 32bit parameter",
+        ", ".join(sorted(k for k in params if k.endswith("32"))),
+    )
+    check.expect(
+        "url_arm64" in params and "hash_arm64" in params,
+        "arm64 survived the 32bit removal",
+        f"{len([k for k in params if k.endswith('arm64')])} arm64 parameters declared",
+    )
+
 
 def check_render(check: Checker) -> None:
     print("\n[2] recipe rendering (offline, virtual parameters)")
     catalog = L.load_recipes()
     for recipe in catalog["recipes"]:
-        spec = dict(DUMMY)
+        # Render from the recipe's own declared parameters only: if a builder
+        # needs something that neither `required` nor `optional` mentions, that
+        # is a catalog bug and this group is where it should surface.
+        declared = set(recipe.get("required", [])) | set(recipe.get("optional", []))
+        spec = {key: value for key, value in DUMMY.items() if key in declared}
+        spec["name"] = "selftest-app"
         spec["recipe"] = recipe["id"]
         try:
             manifest = L.build_manifest(spec)
@@ -184,7 +241,10 @@ def check_render(check: Checker) -> None:
                 f"{recipe['id']} top-level key order is not canonical", f"{keys}"
             )
             continue
-        check.ok(f"{recipe['id']}", f"{len(keys)} top-level fields")
+        check.ok(
+            f"{recipe['id']}",
+            f"{len(keys)} top-level fields from {len(spec) - 2} declared parameters",
+        )
 
 
 def check_repo(check: Checker, repo: Path) -> None:
@@ -238,16 +298,29 @@ def check_repo(check: Checker, repo: Path) -> None:
         else "the centering algorithm matches this repo exactly",
     )
 
-    updated, _msg = L.insert_summary_row(
-        text, tables[0].section, "__selftest__", "https://example.com"
-    )
+    probe = {L.APP_COLUMN: L.app_cell("__selftest__", "https://example.com")}
+    updated, _msg = L.insert_summary_row(text, tables[0].section, probe)
     check.expect(
         updated != text, "inserting a row changes the text (the write path works)"
     )
-    _reverted, _msg2 = L.insert_summary_row(
-        updated, tables[0].section, "__selftest__", "https://example.com"
-    )
+    _reverted, _msg2 = L.insert_summary_row(updated, tables[0].section, probe)
     check.expect(_reverted == updated, "inserting the same row twice is idempotent")
+
+    # This repo's table is App / Language / Auto-Update ?, so a row builder that
+    # assumed the Extras-Plus trio would quietly move the language into the
+    # auto-update cell. Re-syncing an untouched row must be a byte-for-byte no-op.
+    if tables[0].rows:
+        first = list(tables[0].rows[0])
+        again, _msg3 = L.insert_summary_row(
+            text, tables[0].section, {L.APP_COLUMN: first[0]}
+        )
+        after = list(L.parse_summary(again)[0].rows[0])
+        ok = again == text and after == first
+        check.expect(
+            ok,
+            "re-syncing a row is a no-op, so unowned columns survive",
+            "" if ok else f"{first} -> {after}",
+        )
 
 
 def check_lint_baseline(check: Checker, repo: Path) -> None:
@@ -325,7 +398,7 @@ def check_docs(check: Checker) -> None:
             "; ".join(drift) if drift else "",
         )
 
-    # recipes.md ↔ recipes.json
+    # recipes.md ↔ recipes.jsonc
     recipes_doc = refs / "recipes.md"
     if not recipes_doc.is_file():
         check.fail("references/recipes.md is missing")

@@ -1,26 +1,25 @@
 {
     "schema": 1,
-    "default_recipe": "github-portable-zip",
+    "default_recipe": "github-cli-archive",
     "summary_sections": [
-        "AI Specific",
-        "General Use",
-        "Academic Tools",
-        "Development Tools",
-        "Win-Only"
+        "⭐️ Summary"
     ],
+    "readme": {
+        "default_section": "⭐️ Summary",
+        "auto_mark": "✓"
+    },
     "param_docs": {
         "version": "Upstream version string, without the leading v (e.g. 2.1.46)",
         "desc": "One-line English description. Capitalized, no trailing period, <=120 chars",
         "homepage": "Upstream homepage or repository URL",
         "license": "SPDX identifier (MIT / Apache-2.0 / GPL-3.0-or-later); use Proprietary for closed-source, or {\"identifier\":..., \"url\":...}",
         "comment": "Free text for the `##` key, the documented Scoop convention for a comment inside a manifest",
-        "arch": "Architecture set: 64bit, 32bit, arm64, or a + joined combination; defaults to 64bit",
+        "arch": "Architecture set: 64bit, arm64, or the + joined pair 64bit+arm64; defaults to 64bit. 32bit is rejected",
+        "arch_block": "Keep the architecture block even when only one architecture is listed. Default true for the recipes that model this bucket's mainstream shapes (it writes a one-key 64bit block for 19 of its 39 manifests against 6 flat pairs); --flat-url forces the collapsed top-level url/hash form",
         "url64": "64bit direct download URL. Hard-code the current version in it",
-        "url32": "32bit direct download URL (required when arch includes 32bit)",
         "url_arm64": "arm64 direct download URL (required when arch includes arm64)",
         "url": "Single-architecture direct download URL (non-GitHub cases)",
         "hash64": "sha256 for url64. A sha1: / sha512: / md5: prefixed digest is accepted only when autoupdate.hash says where Excavator refetches it",
-        "hash32": "sha256 for url32, same prefix rule as hash64",
         "hash_arm64": "sha256 for url_arm64, same prefix rule as hash64",
         "repo_url": "GitHub repository URL, for the checkver github form (e.g. https://github.com/o/r)",
         "extract_dir": "Directory name inside the archive. Always $PLUGINSDIR for electron-builder output. When it embeds the version, autoupdate.extract_dir is templated automatically",
@@ -65,6 +64,7 @@
         "notes": "Install notes, shown in scoop output",
         "suggest": "Packages suggested alongside (scoop form, e.g. extras/7zip)",
         "depends": "Hard dependency (scoop form)",
+        "language": "Implementation language shown in the README summary table (Rust / Go / Python / C++ / …). Optional: omitting it leaves the existing cell alone",
         "section": "README summary table section, see summary_sections"
     },
     "recipes": [
@@ -87,10 +87,8 @@
                 "comment",
                 "repo_url",
                 "arch",
-                "url32",
                 "url_arm64",
                 "hash64",
-                "hash32",
                 "hash_arm64",
                 "extract_dir",
                 "shortcut_exe",
@@ -99,25 +97,27 @@
                 "bin_exe",
                 "bin_alias",
                 "bin_entries",
+                "env_set",
+                "env_add_path",
                 "persist",
                 "suggest",
                 "notes"
             ],
             "refs": [
-                "alexandria",
-                "normcap",
-                "cytoscape",
-                "comfyui",
-                "catime",
-                "flying-carpet",
-                "pdf4qt",
-                "file-converter"
+                "cargo-update",
+                "cryptomator-cli",
+                "feynman",
+                "ltex-ls-plus",
+                "commix",
+                "micromamba",
+                "nebula",
+                "typst-ts"
             ]
         },
         {
             "id": "github-nsis-7z",
-            "label": "GitHub Release · electron-builder NSIS shell (7z extraction)",
-            "when": "The release is an NSIS .exe installer built by an electron app; the real payload inside is a 7z under $PLUGINSDIR. Skip the installer and treat the shell as a 7z.",
+            "label": "GitHub Release · NSIS shell (7z extraction)",
+            "when": "The release is an NSIS .exe whose real payload is a 7z under $PLUGINSDIR. Skip the installer and treat the shell as a 7z. Reach for it when the payload is not an Electron app too: any NSIS container with a $PLUGINSDIR payload fits.",
             "builder": "github_nsis_7z",
             "defaults": {
                 "arch": "64bit",
@@ -128,8 +128,7 @@
                 "desc",
                 "homepage",
                 "license",
-                "url64",
-                "shortcut_exe"
+                "url64"
             ],
             "optional": [
                 "comment",
@@ -139,24 +138,26 @@
                 "hash64",
                 "hash_arm64",
                 "nsis_payload",
+                "shortcut_exe",
                 "shortcut_name",
                 "shortcut_entries",
                 "bin_exe",
                 "bin_alias",
                 "bin_entries",
+                "env_set",
+                "env_add_path",
                 "persist",
                 "notes"
             ],
             "refs": [
-                "aionui",
-                "bananas",
-                "hermes-one",
-                "cumora",
-                "tylina",
-                "mineru",
-                "zlibrary",
-                "jupyterlab-desktop",
-                "comfyui-manager"
+                "azure-functions-core-tools",
+                "exercism",
+                "ghostscript",
+                "git-annex",
+                "gpac",
+                "graphviz",
+                "iverilog",
+                "elm"
             ]
         },
         {
@@ -172,34 +173,35 @@
                 "desc",
                 "homepage",
                 "license",
-                "url64",
-                "shortcut_exe"
+                "url64"
             ],
             "optional": [
                 "comment",
                 "repo_url",
                 "arch",
-                "url32",
                 "url_arm64",
                 "hash64",
-                "hash32",
                 "hash_arm64",
+                "shortcut_exe",
                 "shortcut_name",
                 "shortcut_entries",
                 "bin_exe",
                 "bin_alias",
                 "bin_entries",
+                "env_set",
+                "env_add_path",
                 "persist",
                 "notes"
             ],
             "refs": [
-                "scihubeva",
-                "pastemd",
-                "winhance",
-                "isobuster",
-                "doxygen-gui",
-                "navicat-premium-lite",
-                "wisecare365"
+                "dvc",
+                "espanso",
+                "get-iplayer",
+                "imagemagick",
+                "lynx",
+                "mercurial",
+                "microsoft-coreutils",
+                "openssl"
             ]
         },
         {
@@ -237,46 +239,61 @@
                 "notes"
             ],
             "refs": [
-                "vibe",
-                "cap",
-                "open-design",
-                "buzz",
-                "linkandroid",
-                "voov-meeting",
-                "watt-toolkit",
-                "veracrypt"
+                "bind",
+                "bun",
+                "cygwin",
+                "erlang",
+                "gitea",
+                "go",
+                "gnupg",
+                "git-machete"
             ]
         },
         {
             "id": "github-single-exe",
             "label": "GitHub Release · single portable exe",
-            "when": "The release is one bare .exe, usable as-is with no extraction.",
+            "when": "The release is a bare .exe, usable as-is with no extraction. Usually exposed through bin; in this repo the same release ships one exe per architecture, so set arch to 64bit+arm64 and give url_arm64 as well.",
             "builder": "github_single_exe",
-            "defaults": {},
+            "defaults": {
+                "arch": "64bit",
+                "arch_block": true
+            },
             "required": [
                 "version",
                 "desc",
                 "homepage",
                 "license",
-                "url64",
-                "shortcut_exe"
+                "url64"
             ],
             "optional": [
                 "comment",
                 "repo_url",
+                "arch",
+                "url_arm64",
                 "hash64",
+                "hash_arm64",
+                "shortcut_exe",
                 "shortcut_name",
                 "shortcut_entries",
                 "bin_exe",
                 "bin_alias",
                 "bin_entries",
+                "env_set",
+                "env_add_path",
                 "persist",
+                "suggest",
                 "notes"
             ],
             "refs": [
-                "configure-defender",
-                "netlogo",
-                "defender-remover"
+                "android-cli",
+                "choose",
+                "gauth",
+                "json-tui",
+                "muscle",
+                "seqkit",
+                "shimmy",
+                "wthrr",
+                "yutu"
             ]
         },
         {
@@ -324,14 +341,14 @@
                 "notes"
             ],
             "refs": [
-                "bitcomet",
-                "veracrypt",
-                "doxygen-gui",
-                "isobuster",
-                "texlive",
-                "wisecare365",
-                "voov-meeting",
-                "landrop-latest"
+                "ant",
+                "autoit",
+                "busybox",
+                "cacert",
+                "cmake",
+                "julia",
+                "msys2",
+                "netcat"
             ]
         },
         {
@@ -373,8 +390,14 @@
                 "notes"
             ],
             "refs": [
-                "filecentipede",
-                "comfyui-manager"
+                "antigravity-cli",
+                "audiowaveform",
+                "bfg",
+                "chromedriver",
+                "dart",
+                "devtunnel",
+                "dotnet-sdk",
+                "edgedb"
             ]
         },
         {
@@ -414,12 +437,14 @@
                 "notes"
             ],
             "refs": [
-                "86box",
-                "adventuregamestudio",
-                "aegisub-arch1t3cht",
-                "age",
-                "anki",
-                "anytype"
+                "aptos-cli",
+                "arc",
+                "aria2",
+                "biome",
+                "capstone",
+                "chroma",
+                "clink",
+                "cloak"
             ]
         },
         {
@@ -458,12 +483,12 @@
                 "notes"
             ],
             "refs": [
-                "86box-roms",
-                "activemq-artemis",
-                "activemq",
-                "aircrack-ng",
-                "antimicrox",
-                "audacity"
+                "emscripten",
+                "memcached",
+                "offlineinsiderenroll",
+                "pdf2svg",
+                "vcpkg",
+                "z.lua"
             ]
         },
         {
@@ -499,10 +524,14 @@
                 "notes"
             ],
             "refs": [
-                "libreoffice",
-                "gtk-sharp",
-                "msxml4",
-                "openvpn"
+                "7zip",
+                "aws-sam-cli",
+                "cppcheck",
+                "espeak-ng",
+                "fio",
+                "juliaup",
+                "kalker",
+                "kiro-cli"
             ]
         },
         {
@@ -530,11 +559,14 @@
                 "notes"
             ],
             "refs": [
-                "completionpredictor",
-                "dockercompletion",
-                "git-aliases",
-                "posh-docker",
-                "leet"
+                "docker-completion",
+                "acmesharp",
+                "gsudo",
+                "importexcel",
+                "pester",
+                "powershell-yaml",
+                "psgithub",
+                "winget-ps"
             ]
         },
         {
@@ -569,12 +601,14 @@
                 "notes"
             ],
             "refs": [
-                "airdroid",
-                "anydesk",
-                "betterbird",
-                "bifrost",
-                "blender",
-                "dolphin"
+                "cangjie",
+                "castxml",
+                "edgedriver",
+                "ijhttp",
+                "pnpm",
+                "postgresql",
+                "qrencode",
+                "selenium-manager"
             ]
         },
         {
@@ -609,12 +643,10 @@
                 "notes"
             ],
             "refs": [
-                "beebeep",
-                "cdburnerxp",
-                "chart-geany",
-                "crystaldiskinfo",
-                "crystaldiskmark",
-                "cudatext"
+                "boost",
+                "gdisk",
+                "rhash",
+                "uncrustify"
             ]
         },
         {
@@ -648,7 +680,14 @@
                 "notes"
             ],
             "refs": [
-                "claude-desktop"
+                "android-cli",
+                "dart",
+                "ddev",
+                "istioctl",
+                "nuclei",
+                "quick-lint-js",
+                "sonar-scanner",
+                "spotdl"
             ]
         },
         {
@@ -686,11 +725,12 @@
                 "notes"
             ],
             "refs": [
-                "7ztm",
-                "bytecode-viewer",
-                "camstudio",
-                "context-menu-manager",
-                "appengine-go"
+                "diffutils",
+                "jsign",
+                "pdfbox",
+                "pkg-config",
+                "say",
+                "shasum"
             ]
         },
         {
@@ -721,6 +761,96 @@
             ],
             "refs": [
                 "comfyui-manager"
+            ]
+        },
+        {
+            "id": "github-cli-archive",
+            "label": "GitHub Release · CLI tool exposed through bin",
+            "when": "The release is a command-line tool: an archive or a bare exe holding one or more executables, and the manifest's entire job is putting them on PATH. This is the default shape of this bucket (38 of its 39 manifests) and of the upstream main bucket (1469 of 1653 declare a bin and no shortcuts). Prefer it over github-portable-zip whenever nothing is installed outside PATH; .tar.gz / .tar.xz / .tar.zst / .tar.lzma payloads are fine, only the URL changes.",
+            "builder": "github_cli_archive",
+            "defaults": {
+                "arch": "64bit",
+                "arch_block": true
+            },
+            "required": [
+                "version",
+                "desc",
+                "homepage",
+                "license",
+                "url64",
+                "bin_exe"
+            ],
+            "optional": [
+                "comment",
+                "repo_url",
+                "arch",
+                "url_arm64",
+                "hash64",
+                "hash_arm64",
+                "extract_dir",
+                "bin_alias",
+                "bin_entries",
+                "env_set",
+                "env_add_path",
+                "persist",
+                "suggest",
+                "notes"
+            ],
+            "refs": [
+                "cargo-dist",
+                "calepin",
+                "sttr",
+                "tex-fmt",
+                "typdiff",
+                "sendme",
+                "act",
+                "air"
+            ]
+        },
+        {
+            "id": "toolchain-env",
+            "label": "Vendor toolchain · installed through the environment",
+            "when": "A compiler / SDK / runtime that you never shim: the archive is unpacked, one of its subdirectories goes on PATH with env_add_path, and one or more *_HOME variables point at $dir with env_set. Upstream, 123 manifests install nothing through bin, shortcuts or psmodule, and 88 of them reach for env_add_path; autoupdate usually has to re-template extract_dir as well, because the vendor archive is named after the version.",
+            "builder": "toolchain_env",
+            "defaults": {
+                "arch": "64bit",
+                "arch_block": true
+            },
+            "required": [
+                "version",
+                "desc",
+                "homepage",
+                "license",
+                "url64"
+            ],
+            "optional": [
+                "comment",
+                "repo_url",
+                "arch",
+                "url_arm64",
+                "hash64",
+                "hash_arm64",
+                "extract_dir",
+                "env_add_path",
+                "env_set",
+                "bin_exe",
+                "bin_alias",
+                "bin_entries",
+                "pre_install",
+                "uninstaller_script",
+                "persist",
+                "suggest",
+                "notes"
+            ],
+            "refs": [
+                "ant",
+                "glfw",
+                "gnutls",
+                "ldc",
+                "libvips",
+                "llvm",
+                "maven",
+                "mingw"
             ]
         }
     ]

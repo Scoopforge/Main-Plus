@@ -1,7 +1,7 @@
-# Recipe catalog (16 recipes)
+# Recipe catalog (18 recipes)
 
 A recipe is a template for one combination of fields, autoupdate shape and
-checkver form. The data source is `assets/recipes.json`; this document is the
+checkver form. The data source is `assets/recipes.jsonc`; this document is the
 readable version, kept in sync by `scripts/sm_selftest.py`.
 
 Decision order: **look at what upstream publishes first, then at how to unpack
@@ -9,14 +9,16 @@ it.**
 
 ```text
 GitHub Release
+  CLI tool, everything goes on PATH → github-cli-archive
   portable archive (.zip/.7z)      → github-portable-zip
-  electron-builder NSIS .exe       → github-nsis-7z
+  NSIS .exe with a 7z payload      → github-nsis-7z
   InnoSetup .exe                   → github-innosetup
   .msi installer                   → github-msi
   installer must actually run      → github-exe-installer
   bare .exe (portable build)       → github-single-exe
   source tag archive               → github-source-archive
   asset list carries extra fields  → github-asset-jsonpath
+vendor toolchain / SDK / runtime   → toolchain-env
 non-GitHub / own CDN
   HTML page / version API          → webpage-regex
   JSON API (rolling build)         → api-jsonpath
@@ -29,24 +31,58 @@ plugin (into a host app)           → github-git-clone
 ```
 
 Where each recipe came from, and what is still uncovered, is in
-`references/coverage.md`. The **Samples** line under each recipe cites files
-from this repo where a manifest of that shape exists, and from the upstream
-`ScoopInstaller/Extras` bucket otherwise.
+`references/coverage.md`. The **Samples** line under each recipe cites a
+manifest that really has that shape: files from this repo where they exist, and
+files from the upstream `ScoopInstaller/Main` bucket otherwise. `comfyui-manager`
+is the one sample that lives in the sibling Extras-Plus bucket.
+
+## github-cli-archive
+
+**Use when** the release is a command-line tool: an archive or a bare exe
+holding one or more executables, and the manifest's whole job is putting them on
+PATH. This is the normal shape here -- 38 of the 39 manifests in this bucket,
+and 1469 of the 1653 upstream.
+
+**Required** `version`, `desc`, `homepage`, `license`, `url64`, `bin_exe`
+
+**Optional** `repo_url`, `arch`, `url_arm64`, `hash64`, `hash_arm64`,
+`extract_dir`, `bin_alias`, `bin_entries`, `env_set`, `env_add_path`,
+`persist`, `suggest`, `notes`, `comment`
+
+**Key point** the recipe **refuses** `shortcut_exe` / `shortcut_entries` instead
+of ignoring them: a Start-menu entry is almost always a sign that the package
+belongs to `github-portable-zip`. The URL extension does not matter --
+`.tar.gz`, `.tar.xz`, `.tar.zst` and `.tar.lzma` releases (142 upstream files,
+109 of them this shape) take the same route as a `.zip`.
+
+**Samples** `cargo-dist`, `calepin`, `sttr`, `tex-fmt`, `typdiff`, `sendme`,
+`act`, `air`
+
+```powershell
+scoop_manifest.py gen --name mytool --recipe github-cli-archive `
+  --version 1.4.0 --desc "Fast command line text transformer" `
+  --homepage https://github.com/acme/mytool --license MIT `
+  --url64 "https://github.com/acme/mytool/releases/download/v1.4.0/mytool-x86_64-pc-windows-msvc.zip" `
+  --bin-exe mytool.exe --language Rust --rehash
+```
 
 ## github-portable-zip
 
-**Use when** the release ships an archive that works as-is, with no installer.
+**Use when** the release ships an archive that works as-is, with no installer,
+and installing it means more than a PATH entry: a Start-menu shortcut, a
+version-stamped `extract_dir`, or environment variables.
 
 **Required** `version`, `desc`, `homepage`, `license`, `url64`
 
-**Optional** `repo_url`, `arch`, `url32`, `url_arm64`, `extract_dir`,
-`shortcut_exe`, `shortcut_name`, `persist`, `suggest`
+**Optional** `repo_url`, `arch`, `url_arm64`, `extract_dir`,
+`shortcut_exe`, `shortcut_name`, `bin_exe`, `bin_alias`, `env_set`,
+`env_add_path`, `persist`, `suggest`, `notes`, `comment`
 
 **Output** with a single architecture the `url` / `hash` pair lands at the top
 level; listing several in `arch` emits an `architecture` block instead.
 
-**Samples** `alexandria`, `normcap`, `cytoscape`, `comfyui`, `catime`,
-`flying-carpet`, `pdf4qt`, `file-converter`
+**Samples** `cargo-update`, `cryptomator-cli`, `feynman`, `ltex-ls-plus`,
+`commix`, `micromamba`, `nebula`, `typst-ts`
 
 ```powershell
 scoop_manifest.py gen --name myapp --recipe github-portable-zip `
@@ -54,27 +90,29 @@ scoop_manifest.py gen --name myapp --recipe github-portable-zip `
   --homepage https://github.com/acme/myapp --license MIT `
   --url64 "https://github.com/acme/myapp/releases/download/v1.2.3/app.zip" `
   --repo-url https://github.com/acme/myapp --extract-dir myapp-1.2.3 `
-  --shortcut-exe myapp.exe --shortcut-name MyApp --section "General Use"
+  --shortcut-exe myapp.exe --shortcut-name MyApp
 ```
 
 ## github-nsis-7z
 
-**Use when** the release is an NSIS installer built by an electron app. The
-installer is a self-extracting shell and the real program lives in a 7z under
-`$PLUGINSDIR`; treating the shell as a 7z is the cleanest route.
+**Use when** the release is an NSIS `.exe` whose real payload is a 7z under
+`$PLUGINSDIR`. The installer is a self-extracting shell; treating the shell as a
+7z is the cleanest route. This covers any such container, not only the
+electron-builder ones the shape was first noticed on.
 
-**Required** `version`, `desc`, `homepage`, `license`, `url64`, `shortcut_exe`
+**Required** `version`, `desc`, `homepage`, `license`, `url64`
 
-**Optional** `repo_url`, `arch`, `url_arm64`, `nsis_payload`, `shortcut_name`,
-`bin_exe`, `bin_alias`, `persist`
+**Optional** `repo_url`, `arch`, `url_arm64`, `nsis_payload`, `shortcut_exe`,
+`shortcut_name`, `bin_exe`, `bin_alias`, `env_set`, `env_add_path`, `persist`
 
 **Key point** the URL must carry `#/dl.7z`. With one architecture the inner
 payload defaults to `app-64.7z`; add `url_arm64` and the arm64 branch gets its
-own `installer` entry pointing at `app-arm64.7z`, with a matching per
-architecture `autoupdate`.
+own `installer` entry pointing at `app-arm64.7z`, with a matching
+per-architecture `autoupdate`. For a CLI payload use `bin_exe` and skip the
+shortcut -- it is optional here.
 
-**Samples** `aionui`, `bananas`, `hermes-one`, `cumora`, `tylina`, `mineru`,
-`zlibrary`, `jupyterlab-desktop`, `comfyui-manager`
+**Samples** `azure-functions-core-tools`, `exercism`, `ghostscript`,
+`git-annex`, `gpac`, `graphviz`, `iverilog`, `elm`
 
 Output (single architecture):
 
@@ -95,13 +133,13 @@ Output (single architecture):
 **Use when** the release is an InnoSetup `.exe`. Scoop unpacks it natively, so
 **just set `"innosetup": true`** and do not write an `installer.script`.
 
-**Required** `version`, `desc`, `homepage`, `license`, `url64`, `shortcut_exe`
+**Required** `version`, `desc`, `homepage`, `license`, `url64`
 
-**Optional** `repo_url`, `arch`, `url32`, `url_arm64`, `shortcut_name`,
-`bin_exe`, `bin_alias`, `persist`
+**Optional** `repo_url`, `arch`, `url_arm64`, `shortcut_exe`,
+`shortcut_name`, `bin_exe`, `bin_alias`, `env_set`, `env_add_path`, `persist`
 
-**Samples** `scihubeva`, `pastemd`, `winhance`, `isobuster`, `doxygen-gui`,
-`navicat-premium-lite`, `wisecare365`
+**Samples** `dvc`, `espanso`, `get-iplayer`, `imagemagick`, `lynx`, `mercurial`,
+`microsoft-coreutils`, `openssl`
 
 ## github-exe-installer
 
@@ -119,18 +157,55 @@ installs drivers, or files have to move out of a subdirectory into `$dir`.
 installer instead of running it. Use `installer_file` + `installer_args` when
 the vendor's own silent flags are enough and no script is needed.
 
-**Samples** `vibe`, `cap`, `open-design`, `buzz`, `linkandroid`, `voov-meeting`,
-`watt-toolkit`, `veracrypt`
+**Samples** `bind`, `bun`, `cygwin`, `erlang`, `gitea`, `go`, `gnupg`,
+`git-machete`
 
 ## github-single-exe
 
-**Use when** the release is one bare exe, usable as-is.
+**Use when** the release is one bare exe, usable as-is. This bucket's repos
+publish one exe per architecture, so set `arch` to `64bit+arm64` and give
+`url_arm64` as well; the default `arch=64bit` keeps the flat `url`/`hash` pair.
 
-**Required** `version`, `desc`, `homepage`, `license`, `url64`, `shortcut_exe`
+**Required** `version`, `desc`, `homepage`, `license`, `url64`
 
-**Optional** `repo_url`, `shortcut_name`, `bin_exe`, `bin_alias`, `persist`
+**Optional** `repo_url`, `arch`, `url_arm64`, `hash_arm64`,
+`shortcut_exe`, `shortcut_name`, `bin_exe`, `bin_alias`, `env_set`,
+`env_add_path`, `persist`, `suggest`, `notes`
 
-**Samples** `configure-defender`, `netlogo`, `defender-remover`
+**Samples** `android-cli`, `choose`, `gauth`, `json-tui`, `muscle`, `seqkit`,
+`shimmy`, `wthrr`, `yutu`
+
+## toolchain-env
+
+**Use when** a compiler / SDK / runtime is never shimmed: the archive is
+unpacked, one of its subdirectories goes on PATH with `env_add_path`, and one or
+more `*_HOME` variables point at `$dir` with `env_set`. Upstream, 123 manifests
+install nothing through `bin`, `shortcuts` or `psmodule`, and 88 of them reach
+for `env_add_path`.
+
+**Required** `version`, `desc`, `homepage`, `license`, `url64`, plus either
+`env_add_path` or `env_set` -- `gen` refuses the recipe without one, because
+there would be nothing to install.
+
+**Optional** `repo_url`, `arch`, `url_arm64`, `extract_dir`,
+`pre_install`, `uninstaller_script`, `bin_exe`, `bin_alias`, `persist`,
+`suggest`, `notes`, `comment`
+
+**Key point** when `extract_dir` embeds the version, `gen` also writes
+`autoupdate.extract_dir` with `$version`; a vendor tarball is always named after
+the release, so Excavator would otherwise bump the URL and keep the old
+directory name.
+
+**Samples** `ant`, `glfw`, `gnutls`, `ldc`, `libvips`, `llvm`, `maven`, `mingw`
+
+```powershell
+scoop_manifest.py gen --name ant --recipe toolchain-env `
+  --version 1.10.18 --desc "Java build tool" `
+  --homepage https://ant.apache.org/ --license Apache-2.0 `
+  --url64 "https://dlcdn.apache.org/ant/binaries/apache-ant-1.10.18-bin.zip" `
+  --extract-dir apache-ant-1.10.18 --env-add-path bin `
+  --env-set ANT_HOME='$dir'
+```
 
 ## webpage-regex
 
@@ -141,19 +216,20 @@ version endpoint that a plain regex can read.
 
 **Optional** `checkver_url` (the page to scrape; **omit it to scrape
 `homepage`**, which collapses `checkver` to the bare regex string), `url_au` (an
-autoupdate template; when omitted the version in
-`url` is swapped for `$version`), `au_hash_url` + `au_hash_regex` (hash from a
-checksum file), `checkver_reverse` (take the last match), `checkver_xpath`
-(for XML pages), `checkver_useragent`, `extract_dir`, `installer_script`,
-`innosetup`, `persist`
+autoupdate template; when omitted the version in `url` is swapped for
+`$version`), `au_hash_url` + `au_hash_regex` (hash from a checksum file),
+`checkver_reverse` (take the last match), `checkver_xpath` (for XML pages),
+`checkver_useragent`, `extract_dir`, `installer_script`, `innosetup`,
+`shortcut_exe`, `bin_exe`, `bin_alias`, `persist`, `suggest`, `notes`
 
 **Key point** the bare-string form is the one upstream uses 147 times and it is
 what Scoop reads as "run this regex over `homepage`". It is only emitted when
 the regex is the sole checkver key, because `replace` / `reverse` / `useragent`
-need the object form.
+need the object form. `ant` and `cacert` show the same recipe on vendor CDNs
+rather than on GitHub releases.
 
-**Samples** `bitcomet`, `veracrypt`, `doxygen-gui`, `isobuster`, `texlive`,
-`wisecare365`, `voov-meeting`, `landrop-latest`
+**Samples** `ant`, `autoit`, `busybox`, `cacert`, `cmake`, `julia`, `msys2`,
+`netcat`
 
 ```powershell
 scoop_manifest.py gen --name myapp --recipe webpage-regex `
@@ -174,11 +250,14 @@ version has to be picked out of a JSON document.
 `checkver_jsonpath`, `checkver_regex`
 
 **Optional** `checkver_replace` (rearranges named groups into a version),
-`checkver_reverse`, `depends`, `installer_script`, `extract_dir`
+`checkver_reverse`, `depends`, `installer_script`, `extract_dir`, `url_au`,
+`au_hash_url` + `au_hash_regex`, `shortcut_exe`, `bin_exe`, `bin_alias`,
+`persist`, `notes`
 
-**Samples** `comfyui-manager`, `filecentipede`
+**Samples** `antigravity-cli`, `audiowaveform`, `bfg`, `chromedriver`, `dart`,
+`devtunnel`, `dotnet-sdk`, `edgedb`
 
-`comfyui-manager` builds its version from the commit timestamp:
+A commit-timestamp version, the shape `comfyui-manager` uses:
 
 ```json
 "checkver": {
@@ -200,16 +279,17 @@ Read the asset list from the GitHub API and carry the extra fields through
 `checkver_url`, `checkver_jsonpath`, `checkver_regex`, `url_au`
 
 **Optional** `arch`, `url_arm64`, `extract_dir`, `shortcut_exe`,
-`shortcut_name`, `bin_exe`, `bin_alias`, `persist`, `suggest`
+`shortcut_name`, `bin_exe`, `bin_alias`, `persist`, `suggest`, `notes`
 
 **Key point** put the API endpoint in `checkver_url`, **never** in
 `checkver.github`: Scoop appends `/releases/latest` to the `github` value
-whatever it holds, which turns an API URL into a 404 (rule W111). A named
-group `(?<build>...)` in `checkver_regex` becomes `$matchBuild` in
-`url_au`; `(?<name>...)` becomes `$matchName`.
+whatever it holds, which turns an API URL into a 404 (rule W111). 83 of the 1653
+upstream manifests do this today. A named group `(?<build>...)` in
+`checkver_regex` becomes `$matchBuild` in `url_au`; `(?<name>...)` becomes
+`$matchName`.
 
-**Samples** `86box`, `adventuregamestudio`, `aegisub-arch1t3cht`, `age`,
-`anki`, `anytype` (all in the upstream `ScoopInstaller/Extras` bucket)
+**Samples** `aptos-cli`, `arc`, `aria2`, `biome`, `capstone`, `chroma`, `clink`,
+`cloak`
 
 ```json
 {
@@ -233,16 +313,15 @@ directory that autoupdate has to re-template.
 **Required** `version`, `desc`, `homepage`, `license`, `url64`, `extract_dir`
 
 **Optional** `repo_url`, `hash64`, `au_hash_url` + `au_hash_regex`,
-`pre_install`, `shortcut_exe`, `bin_exe`, `bin_alias`, `persist`, `depends`
+`pre_install`, `shortcut_exe`, `bin_exe`, `bin_alias`, `persist`, `depends`,
+`suggest`, `notes`
 
 **Key point** when `extract_dir` contains the version, `gen` also writes
-`autoupdate.extract_dir` with `$version`, otherwise Excavator would bump the
-URL and leave the directory name behind. Apache projects publish
-`sha512:` digests, which Scoop accepts only because `autoupdate.hash` says
-where to refetch them.
+`autoupdate.extract_dir` with `$version`, otherwise Excavator would bump the URL
+and leave the directory name behind.
 
-**Samples** `86box-roms`, `activemq-artemis`, `activemq`, `aircrack-ng`,
-`antimicrox`, `audacity` (upstream `ScoopInstaller/Extras`)
+**Samples** `emscripten`, `memcached`, `offlineinsiderenroll`, `pdf2svg`,
+`vcpkg`, `z.lua`
 
 ## github-msi
 
@@ -251,7 +330,7 @@ where to refetch them.
 **Required** `version`, `desc`, `homepage`, `license`, `url64`
 
 **Optional** `repo_url`, `msi_mode`, `msi_args`, `shortcut_exe`,
-`shortcut_name`, `bin_exe`, `bin_alias`, `persist`, `suggest`
+`shortcut_name`, `bin_exe`, `bin_alias`, `persist`, `suggest`, `notes`
 
 **Key point** name the file with a `#/*.msi_` fragment (`#/dl.msi_`,
 `#/setup.msi_`). The trailing `_` tells Scoop not to unpack it. Then pick a
@@ -262,8 +341,8 @@ mode:
 - `msi_mode=install` -- hand it to `msiexec /i`, and `msiexec /x` in
   `pre_uninstall`. Both steps check `is_admin` and re-launch elevated
 
-**Samples** `libreoffice`, `gtk-sharp`, `msxml4`, `openvpn` (upstream
-`ScoopInstaller/Extras`)
+**Samples** `7zip`, `aws-sam-cli`, `cppcheck`, `espeak-ng`, `fio`, `juliaup`,
+`kalker`, `kiro-cli`
 
 ## powershell-gallery
 
@@ -280,8 +359,8 @@ Gallery as a `.nupkg`, installed through the `psmodule` block instead of
 (`_rels`, `package`, `*Content*.xml`) so Scoop treats the directory as a plain
 module folder. `checkver_url` is the gallery page for the module.
 
-**Samples** `completionpredictor`, `dockercompletion`, `git-aliases`,
-`posh-docker`, `leet` (upstream `ScoopInstaller/Extras`)
+**Samples** `acmesharp`, `gsudo`, `importexcel`, `pester`,
+`powershell-beautifier`, `powershell-yaml`, `psgithub`, `winget-ps`
 
 ## checkver-script
 
@@ -293,14 +372,14 @@ computed at run time.
 `checkver_script`, `checkver_regex`
 
 **Optional** `url_au`, `au_hash_url` + `au_hash_regex`, `extract_dir`,
-`pre_install`, `shortcut_exe`, `bin_exe`, `bin_alias`, `persist`
+`pre_install`, `shortcut_exe`, `bin_exe`, `bin_alias`, `persist`, `notes`
 
 **Key point** the script's return value is the text `checkver_regex` runs
 against. It needs a Scoop environment, so `update --checkver` reports that it
 cannot probe it offline and points at `bin/checkver.ps1`.
 
-**Samples** `airdroid`, `anydesk`, `betterbird`, `bifrost`, `blender`,
-`dolphin` (upstream `ScoopInstaller/Extras`)
+**Samples** `cangjie`, `castxml`, `edgedriver`, `ijhttp`, `pnpm`, `postgresql`,
+`qrencode`, `selenium-manager`
 
 ## sourceforge
 
@@ -311,10 +390,14 @@ queries the project RSS on its own, so no page scraping is involved.
 `checkver_sourceforge`, `checkver_regex`
 
 **Optional** `url_au`, `au_hash_url` + `au_hash_regex`, `extract_dir`,
-`pre_install`, `shortcut_exe`, `bin_exe`, `bin_alias`, `persist`
+`pre_install`, `shortcut_exe`, `bin_exe`, `bin_alias`, `persist`, `notes`
 
-**Samples** `beebeep`, `cdburnerxp`, `chart-geany`, `crystaldiskinfo`,
-`crystaldiskmark`, `cudatext` (upstream `ScoopInstaller/Extras`)
+**Key point** only four upstream manifests use the dedicated key, while 23
+download straight from a SourceForge mirror and land in `webpage-regex` or
+`github-cli-archive` instead. Prefer the dedicated key: it survives a project
+page redesign.
+
+**Samples** `boost`, `gdisk`, `rhash`, `uncrustify`
 
 ## redirect-arch
 
@@ -326,9 +409,12 @@ probed elsewhere (e.g. the winget-pkgs commit history).
 `checkver_url`, `checkver_regex`, `shortcut_exe`
 
 **Note** such a manifest **carries no `hash`** -- the content behind the same
-URL changes, so a pinned hash would fail as soon as upstream ships.
+URL changes, so a pinned hash would fail as soon as upstream ships. 18 upstream
+manifests use a versionless link; check whether the vendor also offers a
+versioned one before reaching for this recipe.
 
-**Samples** `claude-desktop`
+**Samples** `android-cli`, `dart`, `ddev`, `istioctl`, `nuclei`,
+`quick-lint-js`, `sonar-scanner`, `spotdl`
 
 ## portable-multifile
 
@@ -339,14 +425,14 @@ helper script, an icon, or a hotfix archive. `url` and `hash` become arrays.
 `extra_urls`, `extra_hashes`
 
 **Optional** `extract_dir`, `pre_install`, `post_install`, `shortcut_exe`,
-`shortcut_name`, `bin_entries`, `persist`, `env_add_path`, `env_set`
+`shortcut_name`, `bin_entries`, `persist`, `env_add_path`, `env_set`,
+`suggest`, `notes`
 
-**Key point** the two arrays must line up one for one; `gen` refuses a
-mismatch instead of writing a manifest Scoop cannot verify. `autoupdate`
-tracks only the main download, because Scoop cannot re-derive a sidecar URL.
+**Key point** the two arrays must line up one for one; `gen` refuses a mismatch
+instead of writing a manifest Scoop cannot verify. `autoupdate` tracks only the
+main download, because Scoop cannot re-derive a sidecar URL.
 
-**Samples** `7ztm`, `bytecode-viewer`, `camstudio`, `context-menu-manager`,
-`appengine-go` (upstream `ScoopInstaller/Extras`)
+**Samples** `diffutils`, `jsign`, `pdfbox`, `pkg-config`, `say`, `shasum`
 
 ## github-git-clone
 
@@ -357,13 +443,14 @@ host application and must be `git clone`d into the host directory.
 `installer_script`, `checkver_url`, `checkver_jsonpath`, `checkver_regex`
 
 **Optional** `checkver_replace`, `extract_dir`, `uninstaller_script`,
-`post_uninstall`
+`post_uninstall`, `notes`
 
-**Samples** `comfyui-manager`
+**Samples** `comfyui-manager` (in the sibling Extras-Plus bucket; no manifest
+here or upstream has this shape)
 
 ## Adding a recipe
 
-1. Add an entry to the `recipes` array in `assets/recipes.json` with `id` /
+1. Add an entry to the `recipes` array in `assets/recipes.jsonc` with `id` /
    `label` / `when` / `builder` / `required` / `optional` / `refs`, and add the
    new parameters to `param_docs`.
 2. Register a builder of the same name in `BUILDERS` in `scripts/sm_lib.py`.

@@ -89,7 +89,7 @@ def cmd_generate(args: argparse.Namespace) -> int:
     catalog = L.load_recipes()
 
     if args.list_recipes:
-        print("Available recipes (assets/recipes.json):\n")
+        print("Available recipes (assets/recipes.jsonc):\n")
         for recipe in catalog["recipes"]:
             print(f"  {recipe['id']}  —  {recipe['label']}")
             print(f"      When: {recipe['when']}")
@@ -142,14 +142,13 @@ def _collect_specs(args: argparse.Namespace, catalog: dict) -> list[dict]:
         "comment": args.comment,
         "url": args.url,
         "url64": args.url64,
-        "url32": args.url32,
         "url_arm64": args.url_arm64,
         "hash": args.hash_value,
         "hash64": args.hash64,
-        "hash32": args.hash32,
         "hash_arm64": args.hash_arm64,
         "repo_url": args.repo_url,
         "arch": args.arch,
+        "arch_block": False if args.flat_url else None,
         "extract_dir": args.extract_dir,
         "extract_to": args.extract_to,
         "nsis_payload": args.nsis_payload,
@@ -197,6 +196,7 @@ def _collect_specs(args: argparse.Namespace, catalog: dict) -> list[dict]:
         "au_hash_url": args.au_hash_url,
         "au_hash_regex": args.au_hash_regex,
         "url_au": args.url_au,
+        "language": args.language,
         "section": args.section,
     }
     overrides = {k: v for k, v in overrides.items() if v not in (None, "")}
@@ -306,6 +306,28 @@ def _generate_one(
     return 0
 
 
+def _default_readme_section(readme: str) -> str | None:
+    """The section to use when --section was not given.
+
+    A bucket with a single app table (Main-Plus) needs no argument. A bucket with
+    several (Extras-Plus) still requires an explicit one, unless recipes.jsonc
+    names a default that really is a table heading in the file.
+    """
+    tables = L.parse_summary(readme)
+    if len(tables) == 1:
+        print(
+            f"  README: --section not given, using the only summary section '{tables[0].section}'"
+        )
+        return tables[0].section
+    configured = (L.load_recipes().get("readme") or {}).get("default_section")
+    if configured and any(table.section == configured for table in tables):
+        print(
+            f"  README: --section not given, using the configured default '{configured}'"
+        )
+        return configured
+    return None
+
+
 def _sync_readme(
     root: Path, spec: dict, manifest: dict, args: argparse.Namespace
 ) -> None:
@@ -313,13 +335,22 @@ def _sync_readme(
     if readme is None:
         print("  [SKIP] no README.md at the repo root")
         return
-    section = spec.get("section")
+    section = spec.get("section") or _default_readme_section(readme)
     if not section:
-        print("  [SKIP] no --section given; README summary table untouched")
+        print(
+            "  [SKIP] no --section given and no single summary table; README untouched"
+        )
         return
-    updated, message = L.insert_summary_row(
-        readme, section, spec["name"], manifest.get("homepage", ""), note=None
-    )
+    auto_mark = (L.load_recipes().get("readme") or {}).get("auto_mark", "✓")
+    values = {
+        # None means "keep what the row already has": the language is optional,
+        # and the note column does not even exist in this bucket.
+        L.APP_COLUMN: L.app_cell(spec["name"], manifest.get("homepage", "")),
+        L.LANGUAGE_COLUMN: spec.get("language"),
+        L.AUTO_COLUMN: auto_mark,
+        L.NOTE_COLUMN: None,
+    }
+    updated, message = L.insert_summary_row(readme, section, values)
     if updated == readme:
         print(f"  README: {message}")
         return
@@ -629,7 +660,16 @@ def _update_one(name: str, args: argparse.Namespace, root: Path, bucket: Path) -
         print(f"  OK wrote {path}")
 
     if args.readme and not args.dry_run:
-        _sync_readme(root, {"name": name, "section": args.section}, manifest, args)
+        _sync_readme(
+            root,
+            {
+                "name": name,
+                "section": args.section,
+                "language": getattr(args, "language", None),
+            },
+            manifest,
+            args,
+        )
 
     if errors:
         report_findings(findings)
@@ -785,11 +825,9 @@ def build_parser() -> argparse.ArgumentParser:
     gen.add_argument("--comment", help="free text for the ## comment key")
     gen.add_argument("--url", help="single-architecture direct download URL")
     gen.add_argument("--url64", help="64bit direct download URL")
-    gen.add_argument("--url32", help="32bit direct download URL")
     gen.add_argument("--url-arm64", dest="url_arm64", help="arm64 direct download URL")
     gen.add_argument("--hash", dest="hash_value", help="sha256 (single architecture)")
     gen.add_argument("--hash64", help="64bit sha256")
-    gen.add_argument("--hash32", help="32bit sha256")
     gen.add_argument("--hash-arm64", dest="hash_arm64", help="arm64 sha256")
     gen.add_argument(
         "--fetch-hash",
@@ -805,6 +843,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="GitHub repository URL (used by checkver github)",
     )
     gen.add_argument("--arch", help="architecture set, e.g. 64bit or 64bit+arm64")
+    gen.add_argument(
+        "--flat-url",
+        action="store_true",
+        dest="flat_url",
+        help="collapse a single-architecture url/hash to the top level",
+    )
     gen.add_argument("--extract-dir", dest="extract_dir")
     gen.add_argument("--extract-to", dest="extract_to")
     gen.add_argument(
@@ -922,7 +966,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--url-au", dest="url_au", help="autoupdate URL template (contains $version)"
     )
     gen.add_argument(
-        "--section", help="README summary table section, e.g. 'General Use'"
+        "--section",
+        help="README summary table section; optional when the README holds a single table",
+    )
+    gen.add_argument(
+        "--language",
+        help="implementation language for the README summary table (Rust / Go / Python / ...)",
     )
     gen.add_argument("--out", help="output directory (default <repo>/bucket)")
     gen.add_argument(
@@ -978,6 +1027,7 @@ def build_parser() -> argparse.ArgumentParser:
     upd.add_argument("--homepage")
     upd.add_argument("--license")
     upd.add_argument("--notes")
+    upd.add_argument("--language", help="implementation language (with --readme)")
     upd.add_argument("--checkver-url", dest="checkver_url")
     upd.add_argument("--checkver-regex", dest="checkver_regex")
     upd.add_argument(

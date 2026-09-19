@@ -3,7 +3,7 @@
 Layers:
     paths        skill_root / assets_dir / find_repo_root / bucket_dir
     serialize    load_manifest / dumps_manifest / write_manifest (4-space indent + CRLF + trailing newline + canonical key order)
-    recipes      load_recipes / recipe_by_id / build_manifest (assets/recipes.json is the single source of truth)
+    recipes      load_recipes / recipe_by_id / build_manifest (assets/recipes.jsonc is the single source of truth)
     checkver     detect_latest (github / url+regex / url+jsonpath+regex+replace)
     hashing      sha256_url / sha256_file
     lint        RULES / lint_manifest_text
@@ -23,10 +23,11 @@ import sys
 import urllib.error
 import urllib.request
 from collections import OrderedDict
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-USER_AGENT = "scoop-manifest-skill/1.0 (+https://github.com/Scoopforge/Extras-Plus)"
+USER_AGENT = "scoop-manifest-skill/1.0 (+https://github.com/Scoopforge/Main-Plus)"
 
 # --------------------------------------------------------------------------
 # 0. Exceptions and runtime
@@ -121,7 +122,7 @@ CANONICAL_ORDER = [
     "autoupdate",
 ]
 
-ARCH_ORDER = ["64bit", "32bit", "arm64"]
+ARCH_ORDER = ["64bit", "arm64"]
 ARCH_MEMBER_ORDER = [
     "url",
     "hash",
@@ -151,9 +152,10 @@ CHECKVER_ORDER = [
 AUTOUPDATE_ORDER = ["architecture", "url", "hash", "extract_dir", "bin", "shortcuts"]
 
 # Architecture key -> parameter suffix. The 64bit slot keeps the historical
-# "url64" / "hash64" spelling; 32bit and arm64 use url32 / url_arm64.
-ARCH_PARAM = {"64bit": "url64", "32bit": "url32", "arm64": "url_arm64"}
-ARCH_HASH_PARAM = {"64bit": "hash64", "32bit": "hash32", "arm64": "hash_arm64"}
+# "url64" / "hash64" spelling; arm64 uses url_arm64. 32bit is deliberately absent:
+# this bucket carries none, and arch_list rejects it before any builder runs.
+ARCH_PARAM = {"64bit": "url64", "arm64": "url_arm64"}
+ARCH_HASH_PARAM = {"64bit": "hash64", "arm64": "hash_arm64"}
 
 # checkver keys Scoop resolves without any url (so no regex is required for them)
 CHECKVER_SELFCONTAINED = ("github", "sourceforge")
@@ -282,7 +284,14 @@ def write_manifest(path: Path, data: dict, preserve_order: bool = False) -> None
 
 
 def load_recipes() -> dict:
-    path = assets_dir() / "recipes.json"
+    # The .jsonc extension is deliberate, not a typo. A Scoop bucket's CI runs
+    # Import-Bucket-Tests.ps1, which validates every *changed* .json in the repo
+    # against scoop's own manifest schema (Get-GitChangedFile -Include '*.json'
+    # is repo-wide, its -Path only locates the git root). This catalog is not a
+    # manifest, so naming it .json fails CI. The content stays plain JSON; no
+    # comments are used, so json.loads() below still parses it. Do not rename it
+    # back, and think twice before adding any other .json under this skill.
+    path = assets_dir() / "recipes.jsonc"
     try:
         return json.loads(
             path.read_text(encoding="utf-8"), object_pairs_hook=OrderedDict
@@ -322,6 +331,11 @@ def arch_list(arch_spec: str) -> list[str]:
     parts = [
         p.strip() for p in str(arch_spec).replace("+", ",").split(",") if p.strip()
     ]
+    if "32bit" in parts:
+        raise SmError(
+            "32bit is not supported by this bucket: it ships 64bit and arm64 only. "
+            "Drop it from arch, or put the 32bit download in a different bucket."
+        )
     unknown = [p for p in parts if p not in ARCH_ORDER]
     if unknown:
         raise SmError(
@@ -502,7 +516,7 @@ def _arch_urls(spec: dict, arches: list[str]) -> tuple[OrderedDict, OrderedDict]
     """Per-architecture url / hash, keyed by the arch name.
 
     The parameter names follow Scoop's historical spelling: 64bit keeps
-    `url64`, everything else is `url32` / `url_arm64`.
+    `url64`; arm64 is `url_arm64`.
     """
     urls: OrderedDict = OrderedDict()
     hashes: OrderedDict = OrderedDict()
@@ -659,11 +673,69 @@ def _b_github_exe_installer(spec: dict) -> OrderedDict:
     return _finish(manifest, urls, spec)
 
 
+def _force_arch(spec: dict, arches: list[str]) -> bool:
+    """Whether the output keeps an architecture block even for a single arch.
+
+    This bucket writes a one-key `architecture.64bit` block for 19 of its 39
+    manifests and only 6 top-level `url`/`hash` pairs, so the recipes that model
+    its mainstream shapes ask for the block; upstream is the same way (603
+    against 288). Pass `--flat-url` to force the historical collapsed form.
+    """
+    return len(arches) > 1 or bool(spec.get("arch_block"))
+
+
 def _b_github_single_exe(spec: dict) -> OrderedDict:
+    """A bare exe, optionally one per architecture: this repo ships 64bit+arm64 pairs."""
+    arches = arch_list(spec.get("arch", "64bit"))
     manifest = _base(spec)
-    urls = OrderedDict([("64bit", spec["url64"])])
-    hashes = OrderedDict([("64bit", _pick(spec, "hash64", "hash") or None)])
-    _place_urls(manifest, urls, hashes)
+    urls, hashes = _arch_urls(spec, arches)
+    _place_urls(manifest, urls, hashes, force_arch=_force_arch(spec, arches))
+    _apply_bin(manifest, spec)
+    _apply_shortcut(manifest, spec)
+    return _finish(manifest, urls, spec)
+
+
+def _b_github_cli_archive(spec: dict) -> OrderedDict:
+    """A CLI tool: the download holds executables and bin shims are the entire install.
+
+    Deliberately refuses shortcuts. This bucket installs 38 of its 39 packages
+    through bin alone, so a shortcut here is almost always a wrong recipe rather
+    than a preference.
+    """
+    if spec.get("shortcut_exe") or spec.get("shortcut_entries"):
+        raise SmError(
+            "github-cli-archive puts nothing outside PATH: drop shortcut_exe / "
+            "shortcut_entries, or use the github-portable-zip recipe"
+        )
+    arches = arch_list(spec.get("arch", "64bit"))
+    manifest = _base(spec)
+    urls, hashes = _arch_urls(spec, arches)
+    _place_urls(manifest, urls, hashes, force_arch=_force_arch(spec, arches))
+    if spec.get("extract_dir"):
+        manifest["extract_dir"] = spec["extract_dir"]
+    if spec.get("pre_install"):
+        manifest["pre_install"] = spec["pre_install"]
+    _apply_bin(manifest, spec)
+    return _finish(manifest, urls, spec)
+
+
+def _b_toolchain_env(spec: dict) -> OrderedDict:
+    """A compiler / SDK / runtime wired up through the environment instead of a shim."""
+    if not (spec.get("env_add_path") or spec.get("env_set")):
+        raise SmError(
+            "toolchain-env installs through the environment: pass env_add_path "
+            "(a directory put on PATH) or env_set (a *_HOME variable)"
+        )
+    arches = arch_list(spec.get("arch", "64bit"))
+    manifest = _base(spec)
+    urls, hashes = _arch_urls(spec, arches)
+    _place_urls(manifest, urls, hashes, force_arch=_force_arch(spec, arches))
+    if spec.get("pre_install"):
+        manifest["pre_install"] = spec["pre_install"]
+    if spec.get("extract_dir"):
+        manifest["extract_dir"] = spec["extract_dir"]
+    if spec.get("uninstaller_script"):
+        manifest["uninstaller"] = OrderedDict([("script", spec["uninstaller_script"])])
     _apply_bin(manifest, spec)
     _apply_shortcut(manifest, spec)
     return _finish(manifest, urls, spec)
@@ -860,6 +932,8 @@ def _b_portable_multifile(spec: dict) -> OrderedDict:
 
 BUILDERS = {
     "github_portable_zip": _b_github_portable_zip,
+    "github_cli_archive": _b_github_cli_archive,
+    "toolchain_env": _b_toolchain_env,
     "github_nsis_7z": _b_github_nsis_7z,
     "github_innosetup": _b_github_innosetup,
     "github_exe_installer": _b_github_exe_installer,
@@ -883,7 +957,7 @@ def build_manifest(spec: dict) -> OrderedDict:
     raw_id = spec.get("recipe") or catalog.get("default_recipe")
     if not isinstance(raw_id, str):
         raise SmError(
-            "no recipe given: pass spec['recipe'], or set default_recipe in recipes.json"
+            "no recipe given: pass spec['recipe'], or set default_recipe in recipes.jsonc"
         )
     recipe_id = raw_id
     recipe = recipe_by_id(recipe_id)
@@ -1681,7 +1755,7 @@ def lint_manifest_text(
         )
 
     # W105 README listing
-    if readme_text is not None and "## ⭐️ Summary" in readme_text:
+    if readme_text is not None and parse_summary(readme_text):
         occurrences = len(re.findall(rf"\[{re.escape(name)}\]\(", readme_text))
         if occurrences == 0:
             documented = readme_app_names(readme_text)
@@ -1710,6 +1784,38 @@ def lint_manifest_text(
 # --------------------------------------------------------------------------
 # 7. README summary table sync
 # --------------------------------------------------------------------------
+
+
+APP_COLUMN = "app"
+LANGUAGE_COLUMN = "language"
+AUTO_COLUMN = "auto"
+NOTE_COLUMN = "note"
+
+
+def column_kinds(header: list[str]) -> dict[int, str]:
+    """Map each README column onto the semantic slot the CLI fills in.
+
+    The header is read from the file instead of assumed, because buckets label
+    the same three cells differently: Extras-Plus writes
+    `App / Auto-Update ? / Note`, Main-Plus writes `App / Language / Auto-Update ?`.
+    A column that matches nothing is left exactly as it was.
+    """
+    kinds: dict[int, str] = {}
+    for index, cell in enumerate(header):
+        label = cell.strip().lower()
+        if index == 0 or label == "app":
+            kinds[index] = APP_COLUMN
+        elif label == "language":
+            kinds[index] = LANGUAGE_COLUMN
+        elif "auto" in label:
+            kinds[index] = AUTO_COLUMN
+        elif label == "note":
+            kinds[index] = NOTE_COLUMN
+    return kinds
+
+
+def _pad_rows(rows: list[list[str]], size: int) -> list[list[str]]:
+    return [row + [""] * (size - len(row)) if len(row) < size else row for row in rows]
 
 
 def _split_row(line: str) -> list[str]:
@@ -1746,15 +1852,22 @@ def _render_table(
 
 
 class SummaryTable:
-    """One summary table in the README. rows are [app_cell, auto_cell, note_cell]."""
+    """One app table in the README, under whatever heading this repo uses."""
 
     def __init__(
-        self, section: str, header: list[str], rows: list[list[str]], widths: list[int]
+        self,
+        section: str,
+        header: list[str],
+        rows: list[list[str]],
+        widths: list[int],
+        level: int = 2,
     ):
         self.section = section
         self.header = header
-        self.rows = rows
+        self.rows = _pad_rows(rows, len(header))
         self.widths = widths
+        self.level = level
+        self.kinds = column_kinds(header)
 
     def find(self, name: str) -> int | None:
         for index, row in enumerate(self.rows):
@@ -1776,14 +1889,23 @@ def readme_app_names(readme_text: str) -> list[str]:
 
 
 def parse_summary(readme_text: str) -> list[SummaryTable]:
+    """Every app table in the README, with the heading it sits under.
+
+    A table counts when its first header cell reads "App". The heading may be at
+    any level: Extras-Plus nests one `###` table per section inside a `##` block,
+    Main-Plus puts a single table straight under `## ⭐️ Summary`.
+    """
     lines = readme_text.splitlines()
     tables: list[SummaryTable] = []
     section = ""
+    level = 2
     index = 0
     while index < len(lines):
         line = lines[index]
-        if line.startswith("### "):
-            section = line[4:].strip()
+        heading = re.match(r"^(#{1,6})\s+(.*?)\s*$", line)
+        if heading:
+            section = heading.group(2)
+            level = len(heading.group(1))
             index += 1
             continue
         if line.strip().startswith("|"):
@@ -1793,30 +1915,30 @@ def parse_summary(readme_text: str) -> list[SummaryTable]:
                 index += 1
             if len(block) >= 3:
                 header = _split_row(block[0])
-                if len(header) == 3 and header[0].lower() == "app":
+                if len(header) >= 2 and header[0].lower() == "app":
                     separator = _split_row(block[1])
                     widths = [len(cell) for cell in separator]
                     rows = [_split_row(row) for row in block[2:]]
-                    tables.append(SummaryTable(section, header, rows, widths))
+                    tables.append(SummaryTable(section, header, rows, widths, level))
             continue
         index += 1
     return tables
 
 
-def summary_entry(
-    name: str, homepage: str, note: str = "", auto: str = "✓"
-) -> list[str]:
-    return [f"[{name}]({homepage})", auto, note]
+def app_cell(name: str, homepage: str) -> str:
+    """The first cell of a summary row: a markdown link to the upstream page."""
+    return f"[{name}]({homepage})"
 
 
 def _locate_summary_table(
     lines: list[str], section: str
 ) -> tuple[int, int, int] | None:
-    """Return (header row, separator row, end row) of the summary table in a section."""
-    heading = f"### {section}"
+    """Return (header row, separator row, end row) of the app table under a heading."""
+    want = section.strip()
     head_index = None
     for index, line in enumerate(lines):
-        if line.strip() == heading:
+        heading = re.match(r"^#{1,6}\s+(.*?)\s*$", line)
+        if heading and heading.group(1) == want:
             head_index = index
             break
     if head_index is None:
@@ -1838,11 +1960,14 @@ def _locate_summary_table(
 
 
 def insert_summary_row(
-    readme_text: str, section: str, name: str, homepage: str, note: str | None = None
+    readme_text: str, section: str, values: Mapping[str, str | None]
 ) -> tuple[str, str]:
-    """Insert or update a row in a section's summary table, in alphabetical order. Returns (new text, note).
+    """Insert or update a row of a section's app table, keeping it alphabetical.
 
-    When note is None: an existing row keeps its note, a new row gets an empty one.
+    `values` is keyed by semantic slot -- "app", "language", "auto", "note". A
+    slot that is absent or None keeps whatever the existing row already holds, so
+    a repo without a Note column is never disturbed and a re-run after a version
+    bump cannot wipe the language cell. Returns (new text, note).
     """
     lines = readme_text.splitlines()
     found = _locate_summary_table(lines, section)
@@ -1855,44 +1980,52 @@ def insert_summary_row(
 
     start, separator_index, end = found
     header = _split_row(lines[start])
-    if len(header) != 3 or header[0].lower() != "app":
-        return (
-            readme_text,
-            f"section '{section}' header is not the App / Auto-Update / Note trio; README untouched",
-        )
-
+    kinds = column_kinds(header)
     widths = [len(cell) for cell in _split_row(lines[separator_index])]
-    rows = [_split_row(row) for row in lines[separator_index + 1 : end]]
+    rows = _pad_rows(
+        [_split_row(row) for row in lines[separator_index + 1 : end]], len(header)
+    )
 
-    row = summary_entry(name, homepage, note or "")
+    linked = values.get(APP_COLUMN)
+    if not linked:
+        return readme_text, "no app cell given; README untouched"
+    match = re.match(r"\[([^\]]+)\]", linked)
+    label = match.group(1) if match else linked
+
     position = None
     for index, existing in enumerate(rows):
-        match = re.match(r"\[([^\]]+)\]\(", existing[0])
-        if match and match.group(1) == name:
+        existing_match = re.match(r"\[([^\]]+)\]\(", existing[0])
+        if existing_match and existing_match.group(1) == label:
             position = index
             break
+
+    previous = rows[position] if position is not None else [""] * len(header)
+    row = []
+    for index in range(len(header)):
+        value = values.get(kinds.get(index, ""))
+        row.append(value if value is not None else previous[index])
+
     if position is None:
         insert_at = len(rows)
         for index, existing in enumerate(rows):
-            match = re.match(r"\[([^\]]+)\]\(", existing[0])
-            if match and match.group(1) > name:
+            existing_match = re.match(r"\[([^\]]+)\]\(", existing[0])
+            if existing_match and existing_match.group(1) > label:
                 insert_at = index
                 break
         rows.insert(insert_at, row)
         action = "inserted"
     else:
-        if note is None:
-            row[2] = rows[position][2]
         rows[position] = row
         action = "updated"
 
-    for i in range(3):
-        widest = max(len(r[i]) for r in [header] + rows) if rows else widths[i]
+    for i in range(len(header)):
+        widest = max(len(r[i]) for r in [header, *rows]) if rows else widths[i]
         widths[i] = max(widths[i], widest)
 
     rendered = _render_table(header, rows, widths)
     out = lines[:start] + rendered + lines[end:]
     newline = "\r\n" if "\r\n" in readme_text else "\n"
-    return newline.join(
-        out
-    ) + newline, f"{action} README row in section '{section}': {name}"
+    return (
+        newline.join(out) + newline,
+        f"{action} README row in section '{section}': {label}",
+    )
