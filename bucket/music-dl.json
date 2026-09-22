@@ -10,7 +10,10 @@
         }
     },
     "bin": [
-        "music-dl.exe"
+        [
+            "music-dl.exe",
+            "mdl"
+        ]
     ],
     "checkver": "github",
     "autoupdate": {
