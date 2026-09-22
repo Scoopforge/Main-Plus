@@ -11,7 +11,7 @@
     },
     "bin": [
         [
-            "opencodereview-windows-amd64.exe",
+            "opencodereview.exe",
             "ocr"
         ]
     ],
