@@ -7,9 +7,9 @@
         "64bit": {
             "url": "https://github.com/nabijaczleweli/cargo-update/releases/download/v22.1.1/cargo-update-v22.1.1.zip#/cargo-update.zip",
             "hash": "2ff2dc5df3babf9d4d7be585a730ea3c685ac0535558d52cc0c54342b4e635fb"
-        },
-        "extract_dir": "cargo-update-v22.1.1"
+        }
     },
+    "extract_dir": "cargo-update-v22.1.1",
     "bin": [
         "cargo-install-update.exe",
         "cargo-install-update-config.exe"
@@ -19,8 +19,8 @@
         "architecture": {
             "64bit": {
                 "url": "https://github.com/nabijaczleweli/cargo-update/releases/download/v$version/cargo-update-v$version.zip#/cargo-update.zip"
-            },
-            "extract_dir": "cargo-update-v$version"
-        }
+            }
+        },
+        "extract_dir": "cargo-update-v$version"
     }
 }
