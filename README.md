@@ -101,6 +101,7 @@ scoop config aria2-min-split-size 4M
 |             [kungfig](https://github.com/ivaquero/kungfig)              |    Rust    |       ✓       |
 |        [ltex-ls-plus](https://github.com/ltex-plus/ltex-ls-plus)        |   Kotlin   |       ✓       |
 |            [micromamba](https://github.com/mamba-org/mamba)             |    C++     |       ✓       |
+|           [moviebox](https://mesamirh.github.io/MovieBox-Tui)           |    Rust    |       ✓       |
 |               [nebula](https://github.com/slackhq/nebula)               |     Go     |       ✓       |
 |        [neocmakelsp](https://github.com/neocmakelsp/neocmakelsp)        |    Rust    |       ✓       |
 |          [n-m3u8dl-re](https://github.com/nilaoda/N_m3u8DL-RE)          |     C#     |       ✓       |
