@@ -1,7 +1,7 @@
-"""Shared library for the scoop-manifest skill (Python standard library only).
+"""Shared library for the main-plus skill (Python standard library only).
 
 Layers:
-    paths        skill_root / assets_dir / find_repo_root / bucket_dir
+    paths        skill_root / assets_dir / find_repo_root / default_repo_root / bucket_dir
     serialize    load_manifest / dumps_manifest / write_manifest (4-space indent + CRLF + trailing newline + canonical key order)
     recipes      load_recipes / recipe_by_id / build_manifest (assets/recipes.jsonc is the single source of truth)
     checkver     detect_latest (github / url+regex / url+jsonpath+regex+replace)
@@ -18,6 +18,7 @@ import contextlib
 import difflib
 import hashlib
 import json
+import os
 import re
 import sys
 import urllib.error
@@ -27,7 +28,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-USER_AGENT = "scoop-manifest-skill/1.0 (+https://github.com/Scoopforge/Main-Plus)"
+USER_AGENT = "main-plus-skill/1.0 (+https://github.com/Scoopforge/Main-Plus)"
 
 # --------------------------------------------------------------------------
 # 0. Exceptions and runtime
@@ -69,15 +70,88 @@ def references_dir() -> Path:
     return skill_root() / "references"
 
 
-def find_repo_root(start: Path | None = None) -> Path:
-    """Walk upwards for a directory holding both bucket/ and README.md."""
-    base = Path(start).resolve() if start is not None else Path.cwd().resolve()
-    for cand in [base, *base.parents]:
-        if (cand / "bucket").is_dir() and (cand / "README.md").is_file():
+#: The bucket this skill installs into when it is called from anywhere.
+DEFAULT_BUCKET_NAME = "main-plus"
+
+#: Scoop exposes its install root as $Scoop on Windows and $SCOOP elsewhere.
+SCOOP_ENV_VARS = ("SCOOP", "Scoop")
+
+
+def is_repo_root(path: Path) -> bool:
+    """A bucket repo root holds both bucket/ and README.md."""
+    return (path / "bucket").is_dir() and (path / "README.md").is_file()
+
+
+def scoop_root() -> Path | None:
+    """$Scoop / %SCOOP%, when it is set and points at an existing directory."""
+    for name in SCOOP_ENV_VARS:
+        raw = os.environ.get(name)
+        if raw:
+            cand = Path(raw)
+            if cand.is_dir():
+                return cand
+    return None
+
+
+def default_repo_root() -> Path | None:
+    """The bucket this skill is bound to: $Scoop/buckets/main-plus.
+
+    This is the fallback that lets a globally installed copy of the skill work
+    from any working directory.  It returns None rather than raising so the
+    caller can report the full resolution order in one message.
+    """
+    root = scoop_root()
+    if root is None:
+        return None
+    cand = root / "buckets" / DEFAULT_BUCKET_NAME
+    return cand if is_repo_root(cand) else None
+
+
+def _walk_up(start: Path) -> Path | None:
+    for cand in [start, *start.parents]:
+        if is_repo_root(cand):
             return cand
+    return None
+
+
+def find_repo_root(start: Path | None = None) -> Path:
+    """Locate the bucket repo root, in this order:
+
+    1. `--repo`, walked upwards from the given path;
+    2. the working directory, walked upwards -- so running inside any bucket
+       keeps editing that bucket;
+    3. `$Scoop/buckets/main-plus` -- the global fallback that makes an
+       installed copy usable from any directory.
+    """
+    if start is not None:
+        found = _walk_up(Path(start).resolve())
+        if found is not None:
+            return found
+        raise SmError(
+            f"no bucket repo at or above {Path(start).resolve()} "
+            "(a repo root needs both bucket/ and README.md); "
+            "check the --repo path."
+        )
+
+    found = _walk_up(Path.cwd().resolve())
+    if found is not None:
+        return found
+
+    fallback = default_repo_root()
+    if fallback is not None:
+        return fallback
+
+    scoop = scoop_root()
+    if scoop is None:
+        raise SmError(
+            "bucket repo root not found: $Scoop is not set and the working "
+            "directory is not inside a bucket. Pass --repo, or run from "
+            "inside the repo."
+        )
     raise SmError(
-        "bucket repo root not found (needs both bucket/ and README.md); "
-        "pass --repo, or run from inside the repo."
+        f"bucket repo root not found: the working directory is not inside a "
+        f"bucket and {scoop / 'buckets' / DEFAULT_BUCKET_NAME} is missing. "
+        "Pass --repo, or clone the bucket to that path."
     )
 
 

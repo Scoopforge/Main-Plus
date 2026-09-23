@@ -1,10 +1,14 @@
-"""scoop-manifest skill CLI: three trigger commands -- generate / update / lint.
+"""main-plus skill CLI: three trigger commands -- generate / update / lint.
 
     python scripts/scoop_manifest.py generate   # generate: build a manifest from a recipe and fill it in
     python scripts/scoop_manifest.py update     # update: edit fields / bump version / rehash / probe upstream
     python scripts/scoop_manifest.py lint       # lint: check bucket/ against this repo's CI standard
 
 All three subcommands accept short aliases: gen, upd, check.
+
+The bucket is located by walking up from the cwd and falls back to
+$Scoop/buckets/main-plus, so an installed copy writes into that bucket from any
+directory. $Scoop is read from the environment on every run, never baked in.
 """
 
 from __future__ import annotations
@@ -798,7 +802,11 @@ def build_parser() -> argparse.ArgumentParser:
             "  lint:     python scripts/scoop_manifest.py lint --fix-format\n"
         ),
     )
-    parser.add_argument("--repo", help="bucket repo root (walks upwards by default)")
+    parser.add_argument(
+        "--repo",
+        help="bucket repo root; without it the cwd is walked upwards and then "
+        "$Scoop/buckets/main-plus is used",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
 
     # --- generate ---

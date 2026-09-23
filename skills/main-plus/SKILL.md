@@ -1,6 +1,6 @@
 ---
-name: scoop-manifest
-version: 1.3.0
+name: main-plus
+version: 1.4.0
 description: >
   Generate, update and lint Main-Plus Scoop bucket manifests (bucket/*.json).
   Three trigger commands: generate builds a skeleton from one of 18 built-in
@@ -9,16 +9,18 @@ description: >
   dotted path, bumps the version while rewriting hard-coded URLs, recomputes
   hashes and probes upstream for the latest release (batch sweep supported);
   lint runs 22 rules against this repo's CI and .editorconfig conventions and
-  repairs formatting with --fix-format.
+  repairs formatting with --fix-format. The target bucket is resolved at run
+  time from $Scoop, so an installed copy writes new manifests into
+  $Scoop/buckets/main-plus from any working directory.
   Triggers: generate manifest, new manifest, update manifest, lint manifest,
-  scoop manifest, bucket manifest, checkver, autoupdate, hash verification,
-  version bump, Excavator, Scoop bucket maintenance, lint bucket.
-display_name: "Scoop Manifest Forge"
+  main-plus, scoop manifest, bucket manifest, checkver, autoupdate, hash
+  verification, version bump, Excavator, Scoop bucket maintenance, lint bucket.
+display_name: "Main-Plus Manifest Forge"
 visibility: "public"
 agent_created: true
 ---
 
-# Scoop Manifest Forge
+# Main-Plus Manifest Forge
 
 Turn "upstream shipped something new" or "upstream shipped a new version" into a
 single command. All three trigger commands -- **generate / update / lint** --
@@ -39,21 +41,34 @@ Package layout:
 - `assets/recipes.jsonc` the single source of truth for recipes. The `.jsonc`
   suffix is deliberate -- see the hard constraints below
 
-Scripts derive the package root themselves, so **they run from any cwd**:
+Scripts derive the package root themselves, so **they run from any cwd**. The
+target bucket is resolved on every run, in this order:
+
+1. `--repo <path>`, when given;
+2. the cwd, walked upwards -- running inside any bucket edits that bucket;
+3. **`$Scoop/buckets/main-plus`** -- the global fallback, which is what lets an
+   installed copy write into this bucket from anywhere else.
+
+`$Scoop` is read from the environment (`SCOOP`, then `Scoop`). The expanded path
+is **never** stored in the skill -- the same package has to work on any machine.
 
 ```bash
 python scripts/scoop_manifest.py <command> [options]
 python scripts/sm_selftest.py
 ```
 
-Managed interpreter on this machine:
-`C:\Users\msain\.workbuddy\binaries\python\versions\3.13.12\python.exe`.
+Pure standard library, so any Python 3.11+ works. On this machine the gates run
+on the managed interpreter at
+`~/.workbuddy/binaries/python/versions/3.13.12/python.exe`.
 
 ## 1. Hard constraints
 
 - **Output**: `<repo>/bucket/<app>.json`, optionally plus a README summary row.
   Never write to `bin/`, `scripts/` or `.github/` -- those belong to Scoop's
   official scripts and to this repo's CI.
+- **Never bake `$Scoop` in.** No file may hold the resolved path
+  (`<drive>:\...\buckets\...`); the environment is read on every run, so one
+  package works on every machine. The self-check fails if a literal reappears.
 - **Never add a `.json` data file inside this skill.** The bucket's CI runs
   `Import-Bucket-Tests.ps1`, which validates every *changed* `.json` in the
   repository against scoop's manifest schema -- repo-wide, because
@@ -65,7 +80,7 @@ Managed interpreter on this machine:
   explicit `--reorder`.
 - **Self-check before writing**: the result goes through the rule engine first,
   and error-level findings block the write (`--force` overrides).
-- **This bucket is bin-first**: it installs 38 of its 39 packages through `bin`
+- **This bucket is bin-first**: it installs 39 of its 40 packages through `bin`
   and declares no `shortcuts` at all. Reach for a shortcut only when the package
   really is a desktop app, and expect `github-cli-archive` to refuse one.
 - **README is controlled**: the table lives under `## ⭐️ Summary` with the three
@@ -80,8 +95,10 @@ Managed interpreter on this machine:
 | **update** | `upd` | Edit fields / bump version + rewrite URLs / recompute hashes / probe upstream | `--name`, `--all`, `--set`, `--unset`, `--version`, `--rehash`, `--readme`, `--checkver [--apply]` |
 | **lint** | `check` | Run the 22 rules, repair formatting | `--name`, `--json`, `--strict`, `--fix-format`, `--rules` |
 
-Shared option `--repo <bucket repo root>`: without it the script walks up from
-the cwd looking for a directory holding both `bucket/` and `README.md`.
+Shared option `--repo <bucket repo root>`. Without it the script walks up from
+the cwd looking for a directory holding both `bucket/` and `README.md`, and
+falls back to `$Scoop/buckets/main-plus` when there is none -- so a copy that is
+installed elsewhere still writes into this bucket.
 
 ## 3. generate
 
@@ -120,7 +137,7 @@ objects whose keys are the `param_docs` names from `recipes.jsonc`, plus `name`,
 **Architecture**: `--arch 64bit+arm64` emits an `architecture` block with
 `url64` / `url_arm64`. A single architecture still gets a block for the recipes
 that set `arch_block` (`github-cli-archive`, `toolchain-env`,
-`github-single-exe`), because that is what 19 of the 39 manifests here do; pass
+`github-single-exe`), because that is what 20 of the 40 manifests here do; pass
 `--flat-url` to collapse it to a top-level `url` / `hash` instead.
 
 **32bit is not supported.** This bucket ships 64bit and arm64 only, so `arch`
@@ -185,12 +202,12 @@ never JSON semantics.
 Exit code: error-level findings give 1; warnings alone give 0, or 1 with
 `--strict`. Rules and their fixes live in `references/lint-rules.md`.
 
-**Baseline (39 manifests)**: 0 errors, 14 warnings, 26 fully clean. Real issues
+**Baseline (40 manifests)**: 0 errors, 13 warnings, 28 fully clean. Real issues
 found so far:
 
 | manifest | Issue | Rule |
 | :--- | :--- | :--- |
-| `android-cli`, `calepin`, `docker-completion`, `muscle`, `seqkit`, `vsearch` | missing from the README summary table | W105 |
+| `calepin`, `docker-completion`, `muscle`, `seqkit`, `vsearch` | missing from the README summary table | W105 |
 | `commix` | `license` is a URL, not an SPDX identifier | W106 |
 | `qlty`, `rheo`, `shiroa` | `license` is prose (`Business Source License 1.1`, `Apache-2.0 license`) | W106 |
 | `micromamba`, `n-m3u8dl-re`, `typst-ts` | `version` carries non-numeric parts (`2.9.0-0`, `0.6.0-beta`, `0.8.0-rc3`), which autoupdate can mishandle | W107 |
@@ -213,13 +230,15 @@ python scripts/sm_selftest.py            # full self-check (offline)
 python scripts/sm_selftest.py --verbose  # print every detail
 ```
 
-The self-check has 6 groups: recipe catalog shape -> recipe <-> builder
-coverage both ways -> virtual rendering of all 18 recipes from their own
-declared parameters -> repo serialization round-trip -> README table
-round-trip, row-insert idempotence and the no-op re-sync -> docs <-> code
-consistency (`lint-rules.md` matches `RULES` word for word, `recipes.md` maps
-one-to-one onto `recipes.jsonc`, and `SKILL.md`'s `name` equals the directory
-name).
+The self-check has 7 groups, numbered in run order: recipe catalog shape and
+architecture policy -> virtual rendering of all 18 recipes from their own
+declared parameters -> skill package consistency (`lint-rules.md` matches
+`RULES` word for word, `recipes.md` maps one-to-one onto `recipes.jsonc`, and
+`SKILL.md`'s `name` equals the directory name) -> path resolution policy (no
+expanded `$Scoop` baked in, and `$Scoop/buckets/main-plus` really is the
+fallback) -> repo serialization round-trip -> README table round-trip,
+row-insert idempotence and the no-op re-sync -> the lint baseline over the real
+bucket.
 
 **Adding a recipe** (4 steps, and the self-check catches omissions): add an entry
 to the `recipes` array in `recipes.jsonc` (`id` / `label` / `when` / `builder` /

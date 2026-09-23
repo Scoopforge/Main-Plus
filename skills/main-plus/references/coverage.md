@@ -14,13 +14,14 @@ Sections 1-2 are the method and the two corpora, 3-8 the survey, 9 the mapping,
 
 Two corpora, both read offline:
 
-- `C:\Scoop\buckets\main\bucket` -- the upstream `ScoopInstaller/Main` bucket,
+- `$env:Scoop\buckets\main\bucket` -- the upstream `ScoopInstaller/Main` bucket,
   **1653** `*.json` manifests and **6340** URLs. This is the corpus the catalog
   is sized against now, because Main-Plus is an enhancement of that bucket and
   inherits its shape.
-- `C:\Scoop\buckets\main-plus\bucket` -- this repo, **39** manifests. Quoted
-  separately wherever it disagrees with upstream, which it often does.
-- The earlier survey of `C:\Scoop\buckets\extras\bucket` (upstream
+- `$env:Scoop\buckets\main-plus\bucket` -- this repo, **39** manifests at the time of
+  the survey. Quoted separately wherever it disagrees with upstream, which it
+  often does.
+- The earlier survey of `$env:Scoop\buckets\extras\bucket` (upstream
   `ScoopInstaller/Extras`, **2389** manifests, **7853** URLs) is still quoted in
   section 2, because it is what the original recipes were shaped by.
 
@@ -36,21 +37,21 @@ the proportions are the durable part. Section 11 has the re-run recipe.
 The two upstream buckets are not variations on a theme; they are opposites in
 the one place that matters most, namely how a package reaches the user.
 
-| Trait                    |      Extras (2389) | Main (1653) | This repo (39) |
-| :----------------------- | -----------------: | ----------: | -------------: |
-| `bin`                    |        1428 (60%) |  1517 (92%) |       38 (97%) |
-| `shortcuts`              |        1843 (77%) |     53 (3%) |              0 |
-| `architecture`           |               1688 |        1365 |             33 |
-| `checkver`               |               2199 |        1567 |             39 |
-| `autoupdate`             |               2210 |        1575 |             39 |
-| top-level `url` + `hash` |                831 |         322 |              6 |
-| `persist`                |                704 |         152 |              3 |
-| `env_set`                |                 44 |         106 |              1 |
-| `env_add_path`           |                 28 |          88 |              1 |
-| `installer`              |                154 |          46 |              0 |
-| `innosetup`              |                124 |          22 |              0 |
-| `psmodule`               |                 18 |           9 |              1 |
-| `##`                     |                 54 |          14 |              0 |
+| Trait                    | Extras (2389) | Main (1653) | This repo (39) |
+| :----------------------- | ------------: | ----------: | -------------: |
+| `bin`                    |    1428 (60%) |  1517 (92%) |       38 (97%) |
+| `shortcuts`              |    1843 (77%) |     53 (3%) |              0 |
+| `architecture`           |          1688 |        1365 |             33 |
+| `checkver`               |          2199 |        1567 |             39 |
+| `autoupdate`             |          2210 |        1575 |             39 |
+| top-level `url` + `hash` |           831 |         322 |              6 |
+| `persist`                |           704 |         152 |              3 |
+| `env_set`                |            44 |         106 |              1 |
+| `env_add_path`           |            28 |          88 |              1 |
+| `installer`              |           154 |          46 |              0 |
+| `innosetup`              |           124 |          22 |              0 |
+| `psmodule`               |            18 |           9 |              1 |
+| `##`                     |            54 |          14 |              0 |
 
 Extras is a **desktop** bucket: a Start-menu shortcut is the normal way to hand
 a package over, and `bin` is the exception. Main is a **CLI** bucket: `bin` is
@@ -101,31 +102,31 @@ Four figures matter for maintenance:
 The shape is `json`-normalised: `str:` means the value is a bare string,
 `{a,b}` means an object with exactly those keys.
 
-| Shape                             | Files | Covered by              |
-| :-------------------------------- | ----: | :---------------------- |
-| `{github}`                        |   527 | every `github-*` recipe |
-| `str:github`                      |   506 | every `github-*` recipe |
-| `{regex,url}`                     |   228 | `webpage-regex`         |
-| *(no checkver)*                   |    86 | --                      |
-| `{github,jsonpath,regex}`         |    82 | `github-asset-jsonpath` |
-| `{github,regex}`                  |    51 | `github-asset-jsonpath` |
-| `str:<regex>`                     |    47 | `webpage-regex`         |
-| `{jsonpath,url}`                  |    30 | `api-jsonpath`          |
-| `{regex,replace,url}`             |    21 | `webpage-regex`         |
-| `{jsonpath,regex,url}`            |    16 | `api-jsonpath`          |
-| `{regex,reverse,url}`             |    11 | `webpage-regex`         |
-| `{regex,script}`                  |    10 | `checkver-script`       |
-| `{github,jsonpath,regex,replace}` |     6 | `github-asset-jsonpath` |
-| `{github,jsonpath}`               |     5 | `github-asset-jsonpath` |
-| `{regex,url,useragent}`           |     5 | `webpage-regex`         |
-| `{regex}`                         |     4 | `checkver-script`       |
-| `{jsonpath,regex,reverse,url}`    |     4 | `api-jsonpath`          |
-| `{regex,sourceforge}`             |     3 | `sourceforge`           |
-| `{url,xpath}` / `{regex,url,xpath}` | 2 / 2 | `webpage-regex`       |
-| `{regex,replace}`                 |     2 | hand-written            |
-| `{github,re}`                     |     1 | `github-asset-jsonpath` (`re` aliases `regex`) |
-| `{sourceforge}`                   |     1 | `sourceforge`           |
-| `{regex,replace,reverse,url}` / `{regex,script,url}` / `{github,jsonpath,regex,script}` | 1 each | hand-written |
+| Shape                                                                                   |  Files | Covered by                                     |
+| :-------------------------------------------------------------------------------------- | -----: | :--------------------------------------------- |
+| `{github}`                                                                              |    527 | every `github-*` recipe                        |
+| `str:github`                                                                            |    506 | every `github-*` recipe                        |
+| `{regex,url}`                                                                           |    228 | `webpage-regex`                                |
+| *(no checkver)*                                                                         |     86 | --                                             |
+| `{github,jsonpath,regex}`                                                               |     82 | `github-asset-jsonpath`                        |
+| `{github,regex}`                                                                        |     51 | `github-asset-jsonpath`                        |
+| `str:<regex>`                                                                           |     47 | `webpage-regex`                                |
+| `{jsonpath,url}`                                                                        |     30 | `api-jsonpath`                                 |
+| `{regex,replace,url}`                                                                   |     21 | `webpage-regex`                                |
+| `{jsonpath,regex,url}`                                                                  |     16 | `api-jsonpath`                                 |
+| `{regex,reverse,url}`                                                                   |     11 | `webpage-regex`                                |
+| `{regex,script}`                                                                        |     10 | `checkver-script`                              |
+| `{github,jsonpath,regex,replace}`                                                       |      6 | `github-asset-jsonpath`                        |
+| `{github,jsonpath}`                                                                     |      5 | `github-asset-jsonpath`                        |
+| `{regex,url,useragent}`                                                                 |      5 | `webpage-regex`                                |
+| `{regex}`                                                                               |      4 | `checkver-script`                              |
+| `{jsonpath,regex,reverse,url}`                                                          |      4 | `api-jsonpath`                                 |
+| `{regex,sourceforge}`                                                                   |      3 | `sourceforge`                                  |
+| `{url,xpath}` / `{regex,url,xpath}`                                                     |  2 / 2 | `webpage-regex`                                |
+| `{regex,replace}`                                                                       |      2 | hand-written                                   |
+| `{github,re}`                                                                           |      1 | `github-asset-jsonpath` (`re` aliases `regex`) |
+| `{sourceforge}`                                                                         |      1 | `sourceforge`                                  |
+| `{regex,replace,reverse,url}` / `{regex,script,url}` / `{github,jsonpath,regex,script}` | 1 each | hand-written                                   |
 
 Per-modifier totals, which the recipes accept as optional parameters:
 
@@ -149,15 +150,15 @@ reads a bare string as a regex run against `$json.homepage`, which is why
 
 ## 5. autoupdate shapes
 
-| Shape                            | Files | Shape                             | Files |
-| :------------------------------- | ----: | :-------------------------------- | ----: |
-| `{architecture}`                 |   749 | `{extract_dir,hash,url}`          |    18 |
-| `{architecture,hash}`            |   510 | `{architecture,extract_dir,hash}` |    12 |
-| `{url}`                          |   145 | `{architecture,bin}`              |     3 |
-| *(no autoupdate)*                |    78 | `{architecture,hash,url}`         |     3 |
-| `{hash,url}`                     |    63 | `{architecture,url}`              |     3 |
-| `{extract_dir,url}`              |    37 | `{bin,url}`                       |     1 |
-| `{architecture,extract_dir}`     |    31 |                                   |       |
+| Shape                        | Files | Shape                             | Files |
+| :--------------------------- | ----: | :-------------------------------- | ----: |
+| `{architecture}`             |   749 | `{extract_dir,hash,url}`          |    18 |
+| `{architecture,hash}`        |   510 | `{architecture,extract_dir,hash}` |    12 |
+| `{url}`                      |   145 | `{architecture,bin}`              |     3 |
+| *(no autoupdate)*            |    78 | `{architecture,hash,url}`         |     3 |
+| `{hash,url}`                 |    63 | `{architecture,url}`              |     3 |
+| `{extract_dir,url}`          |    37 | `{bin,url}`                       |     1 |
+| `{architecture,extract_dir}` |    31 |                                   |       |
 
 Inside `autoupdate.architecture.<arch>` the member shape is almost always
 minimal: `{url}` on 1823 branches, `{extract_dir,url}` on 286, `{hash,url}` on
@@ -198,17 +199,17 @@ Two consequences for the builders:
 Counted **per URL**, not per file, across every `url` / `url64` / `url32` /
 `url_arm64` at any nesting depth -- **6340** URLs in total:
 
-| Extension | URLs |     | Extension   | URLs |
-| :-------- | ---: | :-- | :---------- | ---: |
-| `.zip`    | 2902 |     | `.tar.lzma` |   31 |
-| `.exe`    |  945 |     | `.ps1`      |   30 |
-| `.tar.gz` |  422 |     | `.tar.zst`  |   24 |
-| `.txt`    |  316 |     | `.jar`      |   23 |
-| `.sha256` |  171 |     | `.tar.xz`   |   22 |
-| `.msi`    |  127 |     | `.nupkg`    |   17 |
-| `.7z`     |  110 |     | `.sha512`   |   17 |
-| `.html`   |   75 |     | `.tgz`      |   17 |
-| `.json`   |   51 |     | `.gz`       |   12 |
+| Extension | URLs |      | Extension   | URLs |
+| :-------- | ---: | :--- | :---------- | ---: |
+| `.zip`    | 2902 |      | `.tar.lzma` |   31 |
+| `.exe`    |  945 |      | `.ps1`      |   30 |
+| `.tar.gz` |  422 |      | `.tar.zst`  |   24 |
+| `.txt`    |  316 |      | `.jar`      |   23 |
+| `.sha256` |  171 |      | `.tar.xz`   |   22 |
+| `.msi`    |  127 |      | `.nupkg`    |   17 |
+| `.7z`     |  110 |      | `.sha512`   |   17 |
+| `.html`   |   75 |      | `.tgz`      |   17 |
+| `.json`   |   51 |      | `.gz`       |   12 |
 
 **516 URLs carry no extension at all**, and most of those are not packages:
 `.txt`, `.sha256` and `.sha512` together account for 504 URLs, which is the
@@ -217,12 +218,12 @@ parameter. `.html`, `.json` and `.atom` point at checkver targets, not downloads
 
 `#` fragments, again per URL:
 
-| Fragment       |         URLs | Meaning                                        |
-| :------------- | -----------: | :--------------------------------------------- |
-| `#/dl.7z`      |          149 | rename an NSIS shell so Scoop unpacks it as 7z |
-| `#/dl.zip`     |           10 | the same rename trick, for a zip payload       |
-| `#/<tool>.exe` | the long tail | pin the saved name and keep it unpacked       |
-| `#/dl.msi`     |            4 | hand an MSI to Scoop untouched                 |
+| Fragment       |          URLs | Meaning                                        |
+| :------------- | ------------: | :--------------------------------------------- |
+| `#/dl.7z`      |           149 | rename an NSIS shell so Scoop unpacks it as 7z |
+| `#/dl.zip`     |            10 | the same rename trick, for a zip payload       |
+| `#/<tool>.exe` | the long tail | pin the saved name and keep it unpacked        |
+| `#/dl.msi`     |             4 | hand an MSI to Scoop untouched                 |
 
 The named `#/<tool>.exe` fragment is far more common here than in Extras -- it is
 what a CLI release needs when the asset is called
@@ -285,15 +286,15 @@ partition.
 | `webpage-regex`         | non-GitHub `url` + `regex`, plus the bare-string shorthand |                  228 + 47 |
 | `toolchain-env`         | no shim at all; env-driven                                 |                       123 |
 | `github-asset-jsonpath` | GitHub checkver carrying `jsonpath`                        | 82 + 51 + 6 + 5 + 1 = 145 |
-| `api-jsonpath`          | non-GitHub `jsonpath` checkver                             |                  30 + 16 + 4 = 50 |
+| `api-jsonpath`          | non-GitHub `jsonpath` checkver                             |          30 + 16 + 4 = 50 |
 | `github-msi`            | `.msi` among the download URLs                             |                        50 |
-| `github-exe-installer`  | an `installer` block the release actually runs              |                        46 |
+| `github-exe-installer`  | an `installer` block the release actually runs             |                        46 |
 | `github-nsis-7z`        | `#/dl.7z` on the URL                                       |                        40 |
 | `github-innosetup`      | `innosetup: true`                                          |                        22 |
 | `github-single-exe`     | the download is itself the executable                      |                        19 |
 | `redirect-arch`         | version-less permanent link (`/latest/`)                   |                        18 |
 | `checkver-script`       | `checkver.script`                                          |                        12 |
-| `powershell-gallery`    | a `psmodule` block and a `.nupkg` download                  |                         9 |
+| `powershell-gallery`    | a `psmodule` block and a `.nupkg` download                 |                         9 |
 | `github-source-archive` | `archive/refs/tags`, or a version-stamped `extract_dir`    |                         6 |
 | `portable-multifile`    | `url` and `hash` as arrays                                 |                         6 |
 | `sourceforge`           | `checkver.sourceforge`                                     |                         4 |

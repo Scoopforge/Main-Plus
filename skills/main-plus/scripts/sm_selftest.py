@@ -1,4 +1,4 @@
-"""scoop-manifest skill self-check: offline, validates the skill package and the repo baseline.
+"""main-plus skill self-check: offline, validates the skill package and the repo baseline.
 
 python scripts/sm_selftest.py            # full self-check
 python scripts/sm_selftest.py --verbose  # print every detail
@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
+import tempfile
 from collections import OrderedDict
 from pathlib import Path
 
@@ -250,7 +252,7 @@ def check_render(check: Checker) -> None:
 def check_repo(check: Checker, repo: Path) -> None:
     bucket = L.bucket_dir(repo)
     files = sorted(bucket.glob("*.json"))
-    print(f"\n[3] repo round-trip consistency ({repo.name})")
+    print(f"\n[5] repo round-trip consistency ({repo.name})")
     if not files:
         check.fail("no manifests under bucket/")
         return
@@ -270,7 +272,7 @@ def check_repo(check: Checker, repo: Path) -> None:
     else:
         check.ok(f"{len(files)} manifests round-trip byte-identically")
 
-    print("\n[4] README summary table round-trip")
+    print("\n[6] README summary table round-trip")
     readme_path = repo / "README.md"
     if not readme_path.is_file():
         check.warn("no README.md at the repo root, skipping")
@@ -324,7 +326,7 @@ def check_repo(check: Checker, repo: Path) -> None:
 
 
 def check_lint_baseline(check: Checker, repo: Path) -> None:
-    print("\n[5] full lint baseline")
+    print("\n[7] full lint baseline")
     readme = (
         (repo / "README.md").read_text(encoding="utf-8")
         if (repo / "README.md").is_file()
@@ -357,7 +359,7 @@ def check_lint_baseline(check: Checker, repo: Path) -> None:
 
 
 def check_docs(check: Checker) -> None:
-    print("\n[6] docs <-> code consistency")
+    print("\n[3] skill package consistency")
     refs = L.references_dir()
     catalog = L.load_recipes()
     recipe_ids = [r["id"] for r in catalog["recipes"]]
@@ -449,21 +451,101 @@ def check_docs(check: Checker) -> None:
     )
 
 
+def _mkrepo(path: Path) -> None:
+    """The minimum that satisfies is_repo_root(): a bucket/ dir and a README.md."""
+    (path / "bucket").mkdir(parents=True, exist_ok=True)
+    (path / "README.md").write_text("# fake repo\n", encoding="utf-8")
+
+
+def check_paths(check: Checker) -> None:
+    """The $Scoop contract: read from the environment, never expanded into the skill."""
+    print("\n[4] path resolution policy")
+
+    # Nothing in the package may hold the resolved path. The same package has to
+    # work on a machine where Scoop lives elsewhere, so a literal here is a latent
+    # bug rather than a default worth keeping.
+    literal = re.compile(r"[A-Za-z]:[\\/].*[\\/]buckets[\\/]")
+    baked: list[str] = []
+    for source in sorted(L.skill_root().rglob("*")):
+        if not source.is_file() or source.suffix not in {".md", ".py", ".jsonc"}:
+            continue
+        for lineno, line in enumerate(
+            source.read_text(encoding="utf-8").splitlines(), 1
+        ):
+            if literal.search(line):
+                baked.append(f"{source.relative_to(L.skill_root())}:{lineno}")
+    check.expect(
+        not baked,
+        "no expanded $Scoop path is baked into the skill",
+        ", ".join(baked) if baked else "$Scoop appears only as the variable",
+    )
+
+    check.expect(
+        L.DEFAULT_BUCKET_NAME == "main-plus",
+        "the global fallback names this bucket",
+        L.DEFAULT_BUCKET_NAME,
+    )
+
+    # Behaviour, on a throwaway tree: the cwd wins, and $Scoop is the fallback.
+    with tempfile.TemporaryDirectory(prefix="main-plus-selftest-") as tmp:
+        scratch = Path(tmp)
+        env_repo = scratch / "scoop" / "buckets" / L.DEFAULT_BUCKET_NAME
+        cwd_repo = scratch / "checkout"
+        no_repo = scratch / "bare"
+        _mkrepo(env_repo)
+        _mkrepo(cwd_repo)
+        no_repo.mkdir()
+
+        saved = {name: os.environ.pop(name, None) for name in L.SCOOP_ENV_VARS}
+        started_in = Path.cwd()
+        try:
+            os.environ["SCOOP"] = str(scratch / "scoop")
+            os.chdir(cwd_repo)
+            via_cwd = L.find_repo_root()
+            os.chdir(no_repo)
+            via_env = L.find_repo_root()
+        except L.SmError as exc:
+            check.fail("find_repo_root() resolves a bucket without --repo", str(exc))
+            via_cwd = via_env = None
+        finally:
+            os.chdir(started_in)
+            os.environ.pop("SCOOP", None)
+            for name, value in saved.items():
+                if value is not None:
+                    os.environ[name] = value
+
+        check.expect(
+            via_cwd == cwd_repo,
+            "the cwd walk-up beats the $Scoop fallback",
+            str(via_cwd),
+        )
+        check.expect(
+            via_env == env_repo,
+            "with no bucket above the cwd it falls back to $Scoop/buckets/main-plus",
+            str(via_env),
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
-        prog="sm_selftest.py", description="scoop-manifest skill self-check"
+        prog="sm_selftest.py", description="main-plus skill self-check"
     )
     parser.add_argument("--verbose", action="store_true")
-    parser.add_argument("--repo")
+    parser.add_argument(
+        "--repo",
+        help="bucket repo root; without it the cwd is walked upwards and then "
+        "$Scoop/buckets/main-plus is used",
+    )
     args = parser.parse_args()
 
     check = Checker(args.verbose)
-    print("scoop-manifest skill self-check")
+    print("main-plus skill self-check")
     print(f"skill package: {L.skill_root()}")
 
     check_recipes(check)
     check_render(check)
     check_docs(check)
+    check_paths(check)
 
     try:
         repo = L.find_repo_root(Path(args.repo) if args.repo else None)
