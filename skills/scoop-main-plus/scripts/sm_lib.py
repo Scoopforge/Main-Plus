@@ -1,4 +1,4 @@
-"""Shared library for the main-plus skill (Python standard library only).
+"""Shared library for the scoop-main-plus skill (Python standard library only).
 
 Layers:
     paths        skill_root / assets_dir / find_repo_root / default_repo_root / bucket_dir
@@ -28,7 +28,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-USER_AGENT = "main-plus-skill/1.0 (+https://github.com/Scoopforge/Main-Plus)"
+USER_AGENT = "scoop-main-plus-skill/1.0 (+https://github.com/Scoopforge/Main-Plus)"
 
 # --------------------------------------------------------------------------
 # 0. Exceptions and runtime

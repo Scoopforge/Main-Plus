@@ -1,4 +1,4 @@
-"""main-plus skill self-check: offline, validates the skill package and the repo baseline.
+"""scoop-main-plus skill self-check: offline, validates the skill package and the repo baseline.
 
 python scripts/sm_selftest.py            # full self-check
 python scripts/sm_selftest.py --verbose  # print every detail
@@ -487,7 +487,7 @@ def check_paths(check: Checker) -> None:
     )
 
     # Behaviour, on a throwaway tree: the cwd wins, and $Scoop is the fallback.
-    with tempfile.TemporaryDirectory(prefix="main-plus-selftest-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="scoop-main-plus-selftest-") as tmp:
         scratch = Path(tmp)
         env_repo = scratch / "scoop" / "buckets" / L.DEFAULT_BUCKET_NAME
         cwd_repo = scratch / "checkout"
@@ -528,7 +528,7 @@ def check_paths(check: Checker) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        prog="sm_selftest.py", description="main-plus skill self-check"
+        prog="sm_selftest.py", description="scoop-main-plus skill self-check"
     )
     parser.add_argument("--verbose", action="store_true")
     parser.add_argument(
@@ -539,7 +539,7 @@ def main() -> int:
     args = parser.parse_args()
 
     check = Checker(args.verbose)
-    print("main-plus skill self-check")
+    print("scoop-main-plus skill self-check")
     print(f"skill package: {L.skill_root()}")
 
     check_recipes(check)

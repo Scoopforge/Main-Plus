@@ -1,6 +1,6 @@
 ---
-name: main-plus
-version: 1.4.0
+name: scoop-main-plus
+version: 1.5.0
 description: >
   Generate, update and lint Main-Plus Scoop bucket manifests (bucket/*.json).
   Three trigger commands: generate builds a skeleton from one of 18 built-in
@@ -13,14 +13,15 @@ description: >
   time from $Scoop, so an installed copy writes new manifests into
   $Scoop/buckets/main-plus from any working directory.
   Triggers: generate manifest, new manifest, update manifest, lint manifest,
-  main-plus, scoop manifest, bucket manifest, checkver, autoupdate, hash
-  verification, version bump, Excavator, Scoop bucket maintenance, lint bucket.
-display_name: "Main-Plus Manifest Forge"
+  scoop-main-plus, main-plus, scoop manifest, bucket manifest, checkver,
+  autoupdate, hash verification, version bump, Excavator, Scoop bucket
+  maintenance, lint bucket.
+display_name: "Scoop Main-Plus Manifest Forge"
 visibility: "public"
 agent_created: true
 ---
 
-# Main-Plus Manifest Forge
+# Scoop Main-Plus Manifest Forge
 
 Turn "upstream shipped something new" or "upstream shipped a new version" into a
 single command. All three trigger commands -- **generate / update / lint** --
