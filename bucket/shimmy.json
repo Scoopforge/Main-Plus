@@ -11,8 +11,13 @@
     },
     "bin": "shimmy.exe",
     "checkver": {
-        "url": "https://api.github.com/repos/Michael-A-Kuykendall/shimmy/releases?per_page=100",
-        "regex": "/download/v([\\d.]+)/shimmy-windows-x86_64\\.exe"
+        "script": [
+            "$headers = @{ 'User-Agent' = 'Scoop' }",
+            "if ($env:GITHUB_TOKEN) { $headers['Authorization'] = \"token $env:GITHUB_TOKEN\" }",
+            "$releases = Invoke-RestMethod -Uri 'https://api.github.com/repos/Michael-A-Kuykendall/shimmy/releases?per_page=100' -Headers $headers",
+            "($releases | Where-Object { @($_.assets.name) -contains 'shimmy-windows-x86_64.exe' } | Select-Object -First 1).tag_name"
+        ],
+        "regex": "^v([\\d.]+)$"
     },
     "autoupdate": {
         "architecture": {

@@ -18,9 +18,9 @@
         "Scripts"
     ],
     "checkver": {
-        "url": "https://api.anaconda.org/release/conda-forge/micromamba/latest",
-        "regex": "win-64/micromamba-([\\d.]+([\\w-]+)).tar.bz2",
-        "reverse": true
+        "url": "https://api.anaconda.org/package/conda-forge/micromamba/files",
+        "regex": "win-64/micromamba-([\\d.]+-\\d+)\\.tar\\.bz2",
+        "reverse": "true"
     },
     "autoupdate": {
         "url": "https://micro.mamba.pm/api/micromamba/win-64/latest#/dl.tar.bz2"
