@@ -1,12 +1,12 @@
 {
-    "version": "1.13.0",
+    "version": "1.13.1",
     "description": "A hybrid architecture code review tool",
     "homepage": "https://open-codereview.ai/",
     "license": "Apache-2.0",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/alibaba/open-code-review/releases/download/v1.13.0/opencodereview-windows-amd64.exe#/opencodereview.exe",
-            "hash": "595aafc7f072f1aaf531823121341886687aae9cd45a60323383c9db635d19d9"
+            "url": "https://github.com/alibaba/open-code-review/releases/download/v1.13.1/opencodereview-windows-amd64.exe#/opencodereview.exe",
+            "hash": "a9a2b2148bd983be42b8f8fc1cd433e9100b620014408481495bf86cd64ea3ec"
         }
     },
     "bin": [
