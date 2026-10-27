@@ -8,7 +8,7 @@
         "micromamba shell init --shell powershell --root-prefix=~/.local/share/mamba"
     ],
     "url": "https://micro.mamba.pm/api/micromamba/win-64/latest#/dl.tar.bz2",
-    "hash": "97a336f4ab794bd96a6a4da5e6ed63e75a1d31830414a182419b23d3b36f3fe0",
+    "hash": "6283f25f8142606d86e81a43c7103b5d4f1d5c2027e3f9d7326eff23b33930d8",
     "bin": "Library\\bin\\micromamba.exe",
     "env_add_path": "envs\\base",
     "persist": [
